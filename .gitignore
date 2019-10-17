@@ -1,1 +1,4 @@
 pkg/
+mrtmp*
+*.txt
+

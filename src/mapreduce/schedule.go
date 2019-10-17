@@ -1,6 +1,9 @@
 package mapreduce
 
-import "fmt"
+import (
+	"fmt"
+	"sync"
+)
 
 //
 // schedule() starts and waits for all tasks in the given phase (mapPhase
@@ -29,6 +32,64 @@ func schedule(jobName string, mapFiles []string, nReduce int, phase jobPhase, re
 	// have completed successfully, schedule() should return.
 	//
 	// Your code here (Part III, Part IV).
-	//
+	var wg sync.WaitGroup
+	workers := make([]string, 0, 2)
+	doneChan := make([]chan struct{}, 0, 2)
+	var mutex sync.Mutex
+	newCond := *sync.NewCond(&mutex)
+	go func() {
+
+		for {
+			worker := <-registerChan
+			mutex.Lock()
+			workers = append(workers, worker)
+			done := make(chan struct{}, 1)
+			doneChan = append(doneChan, done)
+			doneChan[len(doneChan)-1] <- (struct{}{})
+			if len(workers) >= 1 {
+				newCond.Broadcast()
+			}
+			mutex.Unlock()
+		}
+	}()
+
+	for i := 0; i < ntasks; i++ {
+		var args DoTaskArgs
+		if phase == mapPhase {
+			args = DoTaskArgs{
+				JobName:       jobName,
+				File:          mapFiles[i],
+				Phase:         phase,
+				TaskNumber:    i,
+				NumOtherPhase: n_other,
+			}
+		} else {
+			args = DoTaskArgs{
+				JobName:       jobName,
+				Phase:         phase,
+				TaskNumber:    i,
+				NumOtherPhase: n_other,
+			}
+		}
+		wg.Add(1)
+		idx := i
+		go func() {
+			defer wg.Done()
+
+			var worker string
+			var lenWork int
+			mutex.Lock()
+			if len(workers) == 0 {
+				newCond.Wait()
+			}
+			worker = workers[idx%len(workers)]
+			lenWork = len(workers)
+			mutex.Unlock()
+			<-doneChan[idx%lenWork]
+			call(worker, "Worker.DoTask", args, nil)
+			doneChan[idx%lenWork] <- (struct{}{})
+		}()
+	}
+	wg.Wait()
 	fmt.Printf("Schedule: %v done\n", phase)
 }

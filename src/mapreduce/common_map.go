@@ -3,7 +3,7 @@ package mapreduce
 import (
 	"encoding/json"
 	"hash/fnv"
-	"io"
+	"io/ioutil"
 	"log"
 	"os"
 )
@@ -64,28 +64,12 @@ func doMap(
 			panic(err)
 		}
 	}()
-	fs, err := file.Stat()
-	if err != nil {
-		//
-	}
-	sz := fs.Size()
 
-	data := make([]byte, sz)
-	//fileContents := make([][]byte, nReduce)
+	var data []byte
 
-	//fileContent, err := file.Read(data)
-	for {
-		n, err := file.Read(data)
-		if err != nil && err != io.EOF {
-			panic(err)
-		}
-		if n == 0 {
-			break
-		}
-	}
+	data, err = ioutil.ReadAll(file)
 	res := mapF(inFile, string(data))
 	files := make([]*os.File, nReduce)
-	save := make([][]KeyValue, nReduce)
 	//encoders := make([](*json.Encoder), nReduce)
 	defer func() {
 		for i := 0; i < nReduce; i++ {
@@ -96,25 +80,18 @@ func doMap(
 	}()
 	for i := 0; i < nReduce; i++ {
 		files[i], err = os.Create(reduceName(jobName, mapTask, i))
-		//encoders[i] = json.NewEncoder(files[i])
+
 		if err != nil {
 			log.Fatal("error open")
 		}
 	}
-
-	for i := 0; i < int(len(res)); i++ {
-		// read a chunk
-		//tmp, err := json.Marshal(res[i])
-		//err = io.ioutnReduceil.WriteFile
-		save[ihash(res[i].Key)%nReduce] = append(save[ihash(res[i].Key)%nReduce], res[i])
-	}
+	enc := make([]*json.Encoder, nReduce)
 	for i := 0; i < nReduce; i++ {
-		data, err := json.Marshal(save[i])
-		//fmt.Printf("data %s", data)
-		if err != nil {
-			//
-		}
-		files[i].Write(data)
+		enc[i] = json.NewEncoder(files[i])
+	}
+	for i := 0; i < int(len(res)); i++ {
+		//save[ihash(res[i].Key)%nReduce] = append(save[ihash(res[i].Key)%nReduce], res[i])
+		enc[ihash(res[i].Key)%nReduce].Encode(KeyValue{Key: res[i].Key, Value: res[i].Value})
 	}
 }
 

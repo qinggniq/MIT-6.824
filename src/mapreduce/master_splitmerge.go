@@ -48,6 +48,7 @@ func (mr *Master) merge() {
 	}
 	w.Flush()
 	file.Close()
+	//log.Fatal("end")
 }
 
 // removeFile is a simple wrapper around os.Remove that logs errors.

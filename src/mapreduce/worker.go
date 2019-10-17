@@ -46,7 +46,6 @@ func (wk *Worker) DoTask(arg *DoTaskArgs, _ *struct{}) error {
 	wk.concurrent += 1
 	nc := wk.concurrent
 	wk.Unlock()
-
 	if nc > 1 {
 		// schedule() should never issue more than one RPC at a
 		// time to a given worker.
@@ -75,6 +74,7 @@ func (wk *Worker) DoTask(arg *DoTaskArgs, _ *struct{}) error {
 	switch arg.Phase {
 	case mapPhase:
 		doMap(arg.JobName, arg.TaskNumber, arg.File, arg.NumOtherPhase, wk.Map)
+		fmt.Printf("mapPhase on -- %s\n", arg.File)
 	case reducePhase:
 		doReduce(arg.JobName, arg.TaskNumber, mergeName(arg.JobName, arg.TaskNumber), arg.NumOtherPhase, wk.Reduce)
 	}

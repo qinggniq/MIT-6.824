@@ -35,6 +35,7 @@ func MapFunc(file string, value string) (res []KeyValue) {
 
 // Just return key
 func ReduceFunc(key string, values []string) string {
+	//debug("%d =======", len(values))
 	for _, e := range values {
 		debug("Reduce %s %v\n", key, e)
 	}
@@ -84,7 +85,7 @@ func check(t *testing.T, files []string) {
 		i++
 	}
 	if i != nNumber {
-		t.Fatalf("Expected %d lines in output\n", nNumber)
+		t.Fatalf("Expected %d lines in output but %d\n", nNumber, i)
 	}
 }
 

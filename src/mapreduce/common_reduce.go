@@ -2,7 +2,6 @@ package mapreduce
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"os"
 	"sort"
 )
@@ -42,32 +41,30 @@ func doReduce(
 	// from all the reduce tasks expects. There is nothing special about
 	// JSON -- it is just the marshalling format we chose to use. Your
 	// output code will look something like this:
-	//
-	// enc := json.NewEncoder(file)
-	// for key := ... {
-	// 	enc.Encode(KeyValue{key, reduceF(...)})
-	// }
-	// file.Close()
-	//
-	// Your code here (Part I).
-	//
-	//iles := make([]*os.File, nMap)
-	contents := make([][]KeyValue, nMap)
-	//res := make([]string, nMap)
-	//JsonParse := NewJsonStruct()
+	file, _ := os.OpenFile(outFile, os.O_APPEND|os.O_RDWR|os.O_CREATE, 0755)
+	enc := json.NewEncoder(file)
+	defer file.Close()
+	midRes := make(map[string][]string)
 	for i := 0; i < nMap; i++ {
-		file, err := os.OpenFile(outFile, os.O_APPEND|os.O_RDWR|os.O_CREATE, 0755)
-		defer file.Close()
-		data, err := ioutil.ReadFile(reduceName(jobName, i, reduceTask))
-		if err != nil {
-			//
-		}
-		enc := json.NewEncoder(file)
-		err = json.Unmarshal(data, &contents[i])
-		sort.Sort(ByKey(contents[i]))
-		for j := 0; j < len(contents[i]); j++ {
-			enc.Encode(KeyValue{contents[i][j].Key, reduceF(contents[i][j].Key, []string{contents[i][j].Value})})
+		inFile, err := os.OpenFile(reduceName(jobName, i, reduceTask), os.O_RDONLY, 0755)
+		dec := json.NewDecoder(inFile)
+		for {
+			var kv KeyValue
+			err = dec.Decode(&kv) //(data, &kv)
+			if err != nil {
+				break
+			}
+			midRes[kv.Key] = append(midRes[kv.Key], kv.Value)
 		}
 	}
+	contents := make([]KeyValue, 0, len(midRes))
 
+	for key := range midRes {
+		contents = append(contents, KeyValue{Key: key, Value: ""})
+	}
+
+	sort.Sort(ByKey(contents))
+	for _, kv := range contents {
+		enc.Encode(KeyValue{kv.Key, reduceF(kv.Key, midRes[kv.Key])})
+	}
 }

@@ -68,6 +68,7 @@ func Sequential(jobName string, files []string, nreduce int,
 			for i, f := range mr.files {
 				doMap(mr.jobName, i, f, mr.nReduce, mapF)
 			}
+
 		case reducePhase:
 			for i := 0; i < mr.nReduce; i++ {
 				doReduce(mr.jobName, i, mergeName(mr.jobName, i), len(mr.files), reduceF)
@@ -92,15 +93,15 @@ func (mr *Master) forwardRegistrations(ch chan string) {
 			go func() { ch <- w }() // send without holding the lock.
 			i = i + 1
 		} else {
-			// wait for Register() to add an entry to workers[]
-			// in response to an RPC from a new worker.
+			// wait for Register() to add an entrynreduce[]
+			// in response to an RPC from a new wonreduce
 			mr.newCond.Wait()
 		}
 		mr.Unlock()
 	}
 }
 
-// Distributed schedules map and reduce tasks on workers that register with the
+// Distributed schedules map and reduce tasks on wnreduce register with the
 // master over RPC.
 func Distributed(jobName string, files []string, nreduce int, master string) (mr *Master) {
 	mr = newMaster(master)
