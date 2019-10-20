@@ -1,0 +1,1380 @@
+2019/10/20 20:34:47 here now : 0
+
+2019/10/20 20:34:47 End Now 0 
+
+2019/10/20 20:34:47 here now : 1
+
+2019/10/20 20:34:47 End Now 1 
+
+2019/10/20 20:34:47 here now : 2
+
+2019/10/20 20:34:47 End Now 2 
+
+Test (2A): initial election ...
+2019/10/20 20:34:48 msg == 
+2019/10/20 20:34:48 TimeOut
+
+2019/10/20 20:34:48 Serve [1] trying to be leader
+
+2019/10/20 20:34:48 Sever [2] recived server [1]'s voteRequest
+
+2019/10/20 20:34:48 Sever [2] decide to vote [1]
+
+2019/10/20 20:34:48 msg == 
+2019/10/20 20:34:48 Server [1] currentVote : 2, maxVote : 3 
+
+2019/10/20 20:34:48 Fail or Success
+
+2019/10/20 20:34:48 msg == 
+2019/10/20 20:34:48 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:48 Sever [0] recived server [1]'s voteRequest
+
+2019/10/20 20:34:48 msg == 
+2019/10/20 20:34:48 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:48 RecivedVoteRequest
+
+2019/10/20 20:34:48 Sever [0] decide to vote [1]
+
+2019/10/20 20:34:48 msg == 
+2019/10/20 20:34:48 RecivedVoteRequest
+
+2019/10/20 20:34:48 msg == 
+2019/10/20 20:34:48 msg == 
+2019/10/20 20:34:48 TimeOut
+
+2019/10/20 20:34:48 Serve [2] trying to be leader
+
+2019/10/20 20:34:48 Sever [1] recived server [2]'s voteRequest
+
+2019/10/20 20:34:48 case0
+2019/10/20 20:34:48 Sever [0] recived server [2]'s voteRequest
+
+2019/10/20 20:34:48 case3
+2019/10/20 20:34:48 Server [2] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:48 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:48 msg == 
+2019/10/20 20:34:48 RecivedVoteRequest
+
+2019/10/20 20:34:48 msg == 
+2019/10/20 20:34:48 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:48 Server [2] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:48 msg == 
+2019/10/20 20:34:48 RecivedVoteRequest
+
+2019/10/20 20:34:48 msg == 
+2019/10/20 20:34:48 msg == 
+2019/10/20 20:34:48 TimeOut
+
+2019/10/20 20:34:48 Serve [0] trying to be leader
+
+2019/10/20 20:34:48 Sever [1] recived server [0]'s voteRequest
+
+2019/10/20 20:34:48 case3
+2019/10/20 20:34:48 msg == 
+2019/10/20 20:34:48 RecivedVoteRequest
+
+2019/10/20 20:34:48 Sever [2] recived server [0]'s voteRequest
+
+2019/10/20 20:34:48 case3
+2019/10/20 20:34:48 Server [0] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:48 msg == 
+2019/10/20 20:34:48 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:48 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:48 Server [0] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:48 here timeOutTimer
+2019/10/20 20:34:48 msg == 
+2019/10/20 20:34:48 TimeOut
+
+2019/10/20 20:34:48 Serve [1] trying to be leader
+
+2019/10/20 20:34:48 Sever [2] recived server [1]'s voteRequest
+
+2019/10/20 20:34:48 case3
+2019/10/20 20:34:48 Sever [0] recived server [1]'s voteRequest
+
+2019/10/20 20:34:48 case3
+2019/10/20 20:34:48 Server [1] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:48 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:48 Server [1] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:49 here timeOutTimer
+2019/10/20 20:34:49 Fail or Success
+
+2019/10/20 20:34:49 msg == 
+2019/10/20 20:34:49 RecivedVoteRequest
+
+2019/10/20 20:34:49 msg == 
+2019/10/20 20:34:49 msg == 
+2019/10/20 20:34:49 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:49 RecivedVoteRequest
+
+2019/10/20 20:34:49 msg == 
+2019/10/20 20:34:49 msg == 
+2019/10/20 20:34:49 TimeOut
+
+2019/10/20 20:34:49 Serve [2] trying to be leader
+
+2019/10/20 20:34:49 Sever [1] recived server [2]'s voteRequest
+
+2019/10/20 20:34:49 case3
+2019/10/20 20:34:49 Server [2] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:49 Sever [0] recived server [2]'s voteRequest
+
+2019/10/20 20:34:49 case3
+2019/10/20 20:34:49 Server [2] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:49 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:49 here timeOutTimer
+2019/10/20 20:34:49 Fail or Success
+
+2019/10/20 20:34:49 msg == 
+2019/10/20 20:34:49 RecivedVoteRequest
+
+2019/10/20 20:34:49 msg == 
+2019/10/20 20:34:49 msg == 
+2019/10/20 20:34:49 RecivedVoteRequest
+
+2019/10/20 20:34:49 msg == 
+2019/10/20 20:34:49 msg == 
+2019/10/20 20:34:49 TimeOut
+
+2019/10/20 20:34:49 Serve [0] trying to be leader
+
+2019/10/20 20:34:49 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:49 Sever [2] recived server [0]'s voteRequest
+
+2019/10/20 20:34:49 case3
+2019/10/20 20:34:49 Sever [1] recived server [0]'s voteRequest
+
+2019/10/20 20:34:49 case3
+2019/10/20 20:34:49 Server [0] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:49 Server [0] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:49 here timeOutTimer
+2019/10/20 20:34:49 Fail or Success
+
+2019/10/20 20:34:49 msg == 
+2019/10/20 20:34:49 RecivedVoteRequest
+
+2019/10/20 20:34:49 msg == 
+2019/10/20 20:34:49 msg == 
+2019/10/20 20:34:49 RecivedVoteRequest
+
+2019/10/20 20:34:49 msg == 
+2019/10/20 20:34:49 msg == 
+2019/10/20 20:34:49 TimeOut
+
+2019/10/20 20:34:49 Serve [1] trying to be leader
+
+2019/10/20 20:34:49 Sever [2] recived server [1]'s voteRequest
+
+2019/10/20 20:34:49 case3
+2019/10/20 20:34:49 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:49 Server [1] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:49 Sever [0] recived server [1]'s voteRequest
+
+2019/10/20 20:34:49 case3
+2019/10/20 20:34:49 Server [1] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:49 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:49 here timeOutTimer
+2019/10/20 20:34:49 Fail or Success
+
+2019/10/20 20:34:49 msg == 
+2019/10/20 20:34:49 msg == 
+2019/10/20 20:34:49 RecivedVoteRequest
+
+2019/10/20 20:34:49 msg == 
+2019/10/20 20:34:49 RecivedVoteRequest
+
+2019/10/20 20:34:49 msg == 
+2019/10/20 20:34:49 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:49 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:49 msg == 
+2019/10/20 20:34:49 TimeOut
+
+2019/10/20 20:34:49 Serve [2] trying to be leader
+
+2019/10/20 20:34:49 Sever [0] recived server [2]'s voteRequest
+
+2019/10/20 20:34:49 case3
+2019/10/20 20:34:49 Sever [1] recived server [2]'s voteRequest
+
+2019/10/20 20:34:49 case3
+2019/10/20 20:34:49 Server [2] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:49 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:49 Server [2] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:49 here timeOutTimer
+2019/10/20 20:34:49 Fail or Success
+
+2019/10/20 20:34:49 msg == 
+2019/10/20 20:34:49 RecivedVoteRequest
+
+2019/10/20 20:34:49 msg == 
+2019/10/20 20:34:49 msg == 
+2019/10/20 20:34:49 RecivedVoteRequest
+
+2019/10/20 20:34:49 msg == 
+2019/10/20 20:34:49 msg == 
+2019/10/20 20:34:49 TimeOut
+
+2019/10/20 20:34:49 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:49 Serve [0] trying to be leader
+
+2019/10/20 20:34:49 Sever [2] recived server [0]'s voteRequest
+
+2019/10/20 20:34:49 case3
+2019/10/20 20:34:49 Server [0] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:49 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:49 Sever [1] recived server [0]'s voteRequest
+
+2019/10/20 20:34:49 case3
+2019/10/20 20:34:49 Server [0] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:50 here timeOutTimer
+2019/10/20 20:34:50 Fail or Success
+
+2019/10/20 20:34:50 msg == 
+2019/10/20 20:34:50 RecivedVoteRequest
+
+2019/10/20 20:34:50 msg == 
+2019/10/20 20:34:50 msg == 
+2019/10/20 20:34:50 RecivedVoteRequest
+
+2019/10/20 20:34:50 msg == 
+2019/10/20 20:34:50 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:50 msg == 
+2019/10/20 20:34:50 TimeOut
+
+2019/10/20 20:34:50 Serve [1] trying to be leader
+
+2019/10/20 20:34:50 Sever [2] recived server [1]'s voteRequest
+
+2019/10/20 20:34:50 case3
+2019/10/20 20:34:50 Sever [0] recived server [1]'s voteRequest
+
+2019/10/20 20:34:50 Server [1] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:50 case3
+2019/10/20 20:34:50 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:50 Server [1] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:50 here timeOutTimer
+2019/10/20 20:34:50 Fail or Success
+
+2019/10/20 20:34:50 msg == 
+2019/10/20 20:34:50 RecivedVoteRequest
+
+2019/10/20 20:34:50 msg == 
+2019/10/20 20:34:50 msg == 
+2019/10/20 20:34:50 TimeOut
+
+2019/10/20 20:34:50 Serve [0] trying to be leader
+
+2019/10/20 20:34:50 Sever [2] recived server [0]'s voteRequest
+
+2019/10/20 20:34:50 case3
+2019/10/20 20:34:50 Server [0] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:50 Sever [1] recived server [0]'s voteRequest
+
+2019/10/20 20:34:50 case3
+2019/10/20 20:34:50 Server [0] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:50 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:50 here timeOutTimer
+2019/10/20 20:34:50 Fail or Success
+
+2019/10/20 20:34:50 msg == 
+2019/10/20 20:34:50 RecivedVoteRequest
+
+2019/10/20 20:34:50 msg == 
+2019/10/20 20:34:50 msg == 
+2019/10/20 20:34:50 msg == 
+2019/10/20 20:34:50 RecivedVoteRequest
+
+2019/10/20 20:34:50 msg == 
+2019/10/20 20:34:50 RecivedVoteRequest
+
+2019/10/20 20:34:50 msg == 
+2019/10/20 20:34:50 msg == 
+2019/10/20 20:34:50 TimeOut
+
+2019/10/20 20:34:50 Serve [2] trying to be leader
+
+2019/10/20 20:34:50 Sever [1] recived server [2]'s voteRequest
+
+2019/10/20 20:34:50 case3
+2019/10/20 20:34:50 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:50 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:50 Server [2] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:50 Sever [0] recived server [2]'s voteRequest
+
+2019/10/20 20:34:50 case3
+2019/10/20 20:34:50 Server [2] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:50 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:50 here timeOutTimer
+2019/10/20 20:34:50 Fail or Success
+
+2019/10/20 20:34:50 msg == 
+2019/10/20 20:34:50 RecivedVoteRequest
+
+2019/10/20 20:34:50 msg == 
+2019/10/20 20:34:50 msg == 
+2019/10/20 20:34:50 RecivedVoteRequest
+
+2019/10/20 20:34:50 msg == 
+2019/10/20 20:34:50 msg == 
+2019/10/20 20:34:50 TimeOut
+
+2019/10/20 20:34:50 Serve [1] trying to be leader
+
+2019/10/20 20:34:50 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:50 Sever [2] recived server [1]'s voteRequest
+
+2019/10/20 20:34:50 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:50 case3
+2019/10/20 20:34:50 Sever [0] recived server [1]'s voteRequest
+
+2019/10/20 20:34:50 case3
+2019/10/20 20:34:50 Server [1] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:50 Server [1] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:51 here timeOutTimer
+2019/10/20 20:34:51 Fail or Success
+
+2019/10/20 20:34:51 msg == 
+2019/10/20 20:34:51 RecivedVoteRequest
+
+2019/10/20 20:34:51 msg == 
+2019/10/20 20:34:51 msg == 
+2019/10/20 20:34:51 RecivedVoteRequest
+
+2019/10/20 20:34:51 msg == 
+2019/10/20 20:34:51 msg == 
+2019/10/20 20:34:51 TimeOut
+
+2019/10/20 20:34:51 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:51 Serve [0] trying to be leader
+
+2019/10/20 20:34:51 Sever [1] recived server [0]'s voteRequest
+
+2019/10/20 20:34:51 case3
+2019/10/20 20:34:51 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:51 Server [0] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:51 Sever [2] recived server [0]'s voteRequest
+
+2019/10/20 20:34:51 case3
+2019/10/20 20:34:51 Server [0] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:51 here timeOutTimer
+2019/10/20 20:34:51 Fail or Success
+
+2019/10/20 20:34:51 msg == 
+2019/10/20 20:34:51 RecivedVoteRequest
+
+2019/10/20 20:34:51 msg == 
+2019/10/20 20:34:51 msg == 
+2019/10/20 20:34:51 RecivedVoteRequest
+
+2019/10/20 20:34:51 msg == 
+2019/10/20 20:34:51 msg == 
+2019/10/20 20:34:51 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:51 TimeOut
+
+2019/10/20 20:34:51 Serve [2] trying to be leader
+
+2019/10/20 20:34:51 Sever [0] recived server [2]'s voteRequest
+
+2019/10/20 20:34:51 case3
+2019/10/20 20:34:51 Sever [1] recived server [2]'s voteRequest
+
+2019/10/20 20:34:51 case3
+2019/10/20 20:34:51 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:51 Server [2] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:51 Server [2] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:51 here timeOutTimer
+2019/10/20 20:34:51 Fail or Success
+
+2019/10/20 20:34:51 msg == 
+2019/10/20 20:34:51 RecivedVoteRequest
+
+2019/10/20 20:34:51 msg == 
+2019/10/20 20:34:51 msg == 
+2019/10/20 20:34:51 RecivedVoteRequest
+
+2019/10/20 20:34:51 msg == 
+2019/10/20 20:34:51 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:51 msg == 
+2019/10/20 20:34:51 TimeOut
+
+2019/10/20 20:34:51 Serve [1] trying to be leader
+
+2019/10/20 20:34:51 Sever [2] recived server [1]'s voteRequest
+
+2019/10/20 20:34:51 case3
+2019/10/20 20:34:51 Server [1] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:51 Sever [0] recived server [1]'s voteRequest
+
+2019/10/20 20:34:51 case3
+2019/10/20 20:34:51 Server [1] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:51 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:51 here timeOutTimer
+2019/10/20 20:34:51 Fail or Success
+
+2019/10/20 20:34:51 msg == 
+2019/10/20 20:34:51 RecivedVoteRequest
+
+2019/10/20 20:34:51 msg == 
+2019/10/20 20:34:51 msg == 
+2019/10/20 20:34:51 TimeOut
+
+2019/10/20 20:34:51 Serve [2] trying to be leader
+
+2019/10/20 20:34:51 Sever [1] recived server [2]'s voteRequest
+
+2019/10/20 20:34:51 case3
+2019/10/20 20:34:51 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:51 Server [2] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:51 Sever [0] recived server [2]'s voteRequest
+
+2019/10/20 20:34:51 case3
+2019/10/20 20:34:51 Server [2] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:52 here timeOutTimer
+2019/10/20 20:34:52 Fail or Success
+
+2019/10/20 20:34:52 msg == 
+2019/10/20 20:34:52 RecivedVoteRequest
+
+2019/10/20 20:34:52 msg == 
+2019/10/20 20:34:52 msg == 
+2019/10/20 20:34:52 RecivedVoteRequest
+
+2019/10/20 20:34:52 msg == 
+2019/10/20 20:34:52 msg == 
+2019/10/20 20:34:52 RecivedVoteRequest
+
+2019/10/20 20:34:52 msg == 
+2019/10/20 20:34:52 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:52 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:52 msg == 
+2019/10/20 20:34:52 TimeOut
+
+2019/10/20 20:34:52 Serve [0] trying to be leader
+
+2019/10/20 20:34:52 Sever [1] recived server [0]'s voteRequest
+
+2019/10/20 20:34:52 case3
+2019/10/20 20:34:52 Sever [2] recived server [0]'s voteRequest
+
+2019/10/20 20:34:52 case3
+2019/10/20 20:34:52 Server [0] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:52 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:52 Server [0] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:52 here timeOutTimer
+2019/10/20 20:34:52 Fail or Success
+
+2019/10/20 20:34:52 msg == 
+2019/10/20 20:34:52 RecivedVoteRequest
+
+2019/10/20 20:34:52 msg == 
+2019/10/20 20:34:52 msg == 
+2019/10/20 20:34:52 RecivedVoteRequest
+
+2019/10/20 20:34:52 msg == 
+2019/10/20 20:34:52 msg == 
+2019/10/20 20:34:52 TimeOut
+
+2019/10/20 20:34:52 Serve [1] trying to be leader
+
+2019/10/20 20:34:52 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:52 Sever [2] recived server [1]'s voteRequest
+
+2019/10/20 20:34:52 case3
+2019/10/20 20:34:52 Sever [0] recived server [1]'s voteRequest
+
+2019/10/20 20:34:52 case3
+2019/10/20 20:34:52 Server [1] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:52 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:52 Server [1] currentVote : 1, maxVote : 3 
+
+--- FAIL: TestInitialElection2A (4.95s)
+    config.go:329: expected one leader, got none
+2019/10/20 20:34:52 here now : 0
+
+2019/10/20 20:34:52 End Now 0 
+
+2019/10/20 20:34:52 here now : 1
+
+2019/10/20 20:34:52 End Now 1 
+
+2019/10/20 20:34:52 here now : 2
+
+2019/10/20 20:34:52 End Now 2 
+
+Test (2A): election after network failure ...
+2019/10/20 20:34:52 here timeOutTimer
+2019/10/20 20:34:52 Fail or Success
+
+2019/10/20 20:34:52 msg == 
+2019/10/20 20:34:52 RecivedVoteRequest
+
+2019/10/20 20:34:52 msg == 
+2019/10/20 20:34:52 msg == 
+2019/10/20 20:34:52 RecivedVoteRequest
+
+2019/10/20 20:34:52 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:52 msg == 
+2019/10/20 20:34:52 msg == 
+2019/10/20 20:34:52 TimeOut
+
+2019/10/20 20:34:52 Serve [2] trying to be leader
+
+2019/10/20 20:34:52 Server [2] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:52 Server [2] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:52 here timeOutTimer
+2019/10/20 20:34:52 Fail or Success
+
+2019/10/20 20:34:52 msg == 
+2019/10/20 20:34:52 RecivedVoteRequest
+
+2019/10/20 20:34:52 msg == 
+2019/10/20 20:34:52 msg == 
+2019/10/20 20:34:52 TimeOut
+
+2019/10/20 20:34:52 Serve [0] trying to be leader
+
+2019/10/20 20:34:52 Server [0] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:52 Server [0] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:52 here timeOutTimer
+2019/10/20 20:34:52 Fail or Success
+
+2019/10/20 20:34:52 msg == 
+2019/10/20 20:34:52 TimeOut
+
+2019/10/20 20:34:52 Serve [1] trying to be leader
+
+2019/10/20 20:34:52 Server [1] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:52 Server [1] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:53 msg == 
+2019/10/20 20:34:53 TimeOut
+
+2019/10/20 20:34:53 Serve [2] trying to be leader
+
+2019/10/20 20:34:53 Sever [0] recived server [2]'s voteRequest
+
+2019/10/20 20:34:53 msg == 
+2019/10/20 20:34:53 RecivedVoteRequest
+
+2019/10/20 20:34:53 Sever [1] recived server [2]'s voteRequest
+
+2019/10/20 20:34:53 Sever [1] decide to vote [2]
+
+2019/10/20 20:34:53 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:53 msg == 
+2019/10/20 20:34:53 RecivedVoteRequest
+
+2019/10/20 20:34:53 msg == 
+2019/10/20 20:34:53 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:53 Server [2] currentVote : 2, maxVote : 3 
+
+2019/10/20 20:34:53 Fail or Success
+
+2019/10/20 20:34:53 Sever [0] decide to vote [2]
+
+2019/10/20 20:34:53 msg == 
+2019/10/20 20:34:53 msg == 
+2019/10/20 20:34:53 here timeOutTimer
+2019/10/20 20:34:53 Fail or Success
+
+2019/10/20 20:34:53 msg == 
+2019/10/20 20:34:53 TimeOut
+
+2019/10/20 20:34:53 Serve [0] trying to be leader
+
+2019/10/20 20:34:53 Server [0] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:53 Server [0] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:53 here timeOutTimer
+2019/10/20 20:34:53 Fail or Success
+
+2019/10/20 20:34:53 msg == 
+2019/10/20 20:34:53 TimeOut
+
+2019/10/20 20:34:53 Serve [2] trying to be leader
+
+2019/10/20 20:34:53 Server [2] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:53 Server [2] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:53 msg == 
+2019/10/20 20:34:53 TimeOut
+
+2019/10/20 20:34:53 Serve [1] trying to be leader
+
+2019/10/20 20:34:53 Sever [2] recived server [1]'s voteRequest
+
+2019/10/20 20:34:53 case0
+2019/10/20 20:34:53 Server [1] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:53 msg == 
+2019/10/20 20:34:53 TimeOut
+
+2019/10/20 20:34:53 Serve [0] trying to be leader
+
+2019/10/20 20:34:53 Sever [0] recived server [1]'s voteRequest
+
+2019/10/20 20:34:53 case3
+2019/10/20 20:34:53 Server [1] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:53 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:53 msg == 
+2019/10/20 20:34:53 RecivedVoteRequest
+
+2019/10/20 20:34:53 Sever [2] recived server [0]'s voteRequest
+
+2019/10/20 20:34:53 case3
+2019/10/20 20:34:53 Server [0] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:53 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:53 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:53 msg == 
+2019/10/20 20:34:53 msg == 
+2019/10/20 20:34:53 RecivedVoteRequest
+
+2019/10/20 20:34:53 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:53 Sever [1] recived server [0]'s voteRequest
+
+2019/10/20 20:34:53 case3
+2019/10/20 20:34:53 Server [0] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:53 here timeOutTimer
+2019/10/20 20:34:53 here timeOutTimer
+2019/10/20 20:34:53 Fail or Success
+
+2019/10/20 20:34:53 msg == 
+2019/10/20 20:34:53 TimeOut
+
+2019/10/20 20:34:53 Serve [0] trying to be leader
+
+2019/10/20 20:34:53 Server [0] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:53 Server [0] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:53 here timeOutTimer
+2019/10/20 20:34:53 Fail or Success
+
+2019/10/20 20:34:53 msg == 
+2019/10/20 20:34:53 TimeOut
+
+2019/10/20 20:34:53 Serve [1] trying to be leader
+
+2019/10/20 20:34:53 Server [1] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:53 Server [1] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:53 here timeOutTimer
+2019/10/20 20:34:53 Fail or Success
+
+2019/10/20 20:34:53 msg == 
+2019/10/20 20:34:53 RecivedVoteRequest
+
+2019/10/20 20:34:53 msg == 
+2019/10/20 20:34:53 TimeOut
+
+2019/10/20 20:34:53 Serve [0] trying to be leader
+
+2019/10/20 20:34:53 Sever [2] recived server [0]'s voteRequest
+
+2019/10/20 20:34:53 case3
+2019/10/20 20:34:53 Sever [1] recived server [0]'s voteRequest
+
+2019/10/20 20:34:53 case3
+2019/10/20 20:34:53 Server [0] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:53 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:53 msg == 
+2019/10/20 20:34:53 RecivedVoteRequest
+
+2019/10/20 20:34:53 msg == 
+2019/10/20 20:34:53 Server [0] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:53 here timeOutTimer
+2019/10/20 20:34:53 Fail or Success
+
+2019/10/20 20:34:53 msg == 
+2019/10/20 20:34:53 TimeOut
+
+2019/10/20 20:34:53 Serve [2] trying to be leader
+
+2019/10/20 20:34:53 Server [2] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:53 Server [2] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:53 msg == 
+2019/10/20 20:34:53 TimeOut
+
+2019/10/20 20:34:53 Serve [2] trying to be leader
+
+2019/10/20 20:34:53 Sever [1] recived server [2]'s voteRequest
+
+2019/10/20 20:34:53 case3
+2019/10/20 20:34:53 Server [2] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:53 Sever [0] recived server [2]'s voteRequest
+
+2019/10/20 20:34:53 case3
+2019/10/20 20:34:53 Server [2] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:53 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:54 here timeOutTimer
+2019/10/20 20:34:54 Fail or Success
+
+2019/10/20 20:34:54 msg == 
+2019/10/20 20:34:54 RecivedVoteRequest
+
+2019/10/20 20:34:54 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:54 msg == 
+2019/10/20 20:34:54 RecivedVoteRequest
+
+2019/10/20 20:34:54 msg == 
+2019/10/20 20:34:54 msg == 
+2019/10/20 20:34:54 RecivedVoteRequest
+
+2019/10/20 20:34:54 msg == 
+2019/10/20 20:34:54 msg == 
+2019/10/20 20:34:54 TimeOut
+
+2019/10/20 20:34:54 Serve [1] trying to be leader
+
+2019/10/20 20:34:54 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:54 Sever [2] recived server [1]'s voteRequest
+
+2019/10/20 20:34:54 case3
+2019/10/20 20:34:54 Sever [0] recived server [1]'s voteRequest
+
+2019/10/20 20:34:54 case3
+2019/10/20 20:34:54 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:54 Server [1] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:54 Server [1] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:54 here timeOutTimer
+2019/10/20 20:34:54 Fail or Success
+
+2019/10/20 20:34:54 msg == 
+2019/10/20 20:34:54 TimeOut
+
+2019/10/20 20:34:54 Serve [0] trying to be leader
+
+2019/10/20 20:34:54 Server [0] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:54 Server [0] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:54 here timeOutTimer
+2019/10/20 20:34:54 Fail or Success
+
+2019/10/20 20:34:54 msg == 
+2019/10/20 20:34:54 TimeOut
+
+2019/10/20 20:34:54 Serve [2] trying to be leader
+
+2019/10/20 20:34:54 Server [2] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:54 Server [2] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:54 here timeOutTimer
+2019/10/20 20:34:54 Fail or Success
+
+2019/10/20 20:34:54 msg == 
+2019/10/20 20:34:54 TimeOut
+
+2019/10/20 20:34:54 Serve [1] trying to be leader
+
+2019/10/20 20:34:54 Server [1] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:54 Server [1] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:54 here timeOutTimer
+2019/10/20 20:34:54 Fail or Success
+
+2019/10/20 20:34:54 msg == 
+2019/10/20 20:34:54 RecivedVoteRequest
+
+2019/10/20 20:34:54 msg == 
+2019/10/20 20:34:54 msg == 
+2019/10/20 20:34:54 TimeOut
+
+2019/10/20 20:34:54 Serve [2] trying to be leader
+
+2019/10/20 20:34:54 Sever [1] recived server [2]'s voteRequest
+
+2019/10/20 20:34:54 case3
+2019/10/20 20:34:54 Server [2] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:54 Sever [0] recived server [2]'s voteRequest
+
+2019/10/20 20:34:54 case3
+2019/10/20 20:34:54 Server [2] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:54 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:54 here timeOutTimer
+2019/10/20 20:34:54 Fail or Success
+
+2019/10/20 20:34:54 msg == 
+2019/10/20 20:34:54 RecivedVoteRequest
+
+2019/10/20 20:34:54 msg == 
+2019/10/20 20:34:54 msg == 
+2019/10/20 20:34:54 RecivedVoteRequest
+
+2019/10/20 20:34:54 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:54 msg == 
+2019/10/20 20:34:54 msg == 
+2019/10/20 20:34:54 RecivedVoteRequest
+
+2019/10/20 20:34:54 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:54 msg == 
+2019/10/20 20:34:54 msg == 
+2019/10/20 20:34:54 TimeOut
+
+2019/10/20 20:34:54 Serve [0] trying to be leader
+
+2019/10/20 20:34:54 Sever [2] recived server [0]'s voteRequest
+
+2019/10/20 20:34:54 case3
+2019/10/20 20:34:54 Server [0] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:54 Sever [1] recived server [0]'s voteRequest
+
+2019/10/20 20:34:54 case3
+2019/10/20 20:34:54 Server [0] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:54 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:55 here timeOutTimer
+2019/10/20 20:34:55 Fail or Success
+
+2019/10/20 20:34:55 msg == 
+2019/10/20 20:34:55 RecivedVoteRequest
+
+2019/10/20 20:34:55 msg == 
+2019/10/20 20:34:55 msg == 
+2019/10/20 20:34:55 RecivedVoteRequest
+
+2019/10/20 20:34:55 msg == 
+2019/10/20 20:34:55 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:55 msg == 
+2019/10/20 20:34:55 TimeOut
+
+2019/10/20 20:34:55 Serve [1] trying to be leader
+
+2019/10/20 20:34:55 Sever [2] recived server [1]'s voteRequest
+
+2019/10/20 20:34:55 case3
+2019/10/20 20:34:55 Server [1] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:55 Sever [0] recived server [1]'s voteRequest
+
+2019/10/20 20:34:55 case3
+2019/10/20 20:34:55 Server [1] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:55 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:55 here timeOutTimer
+2019/10/20 20:34:55 Fail or Success
+
+2019/10/20 20:34:55 msg == 
+2019/10/20 20:34:55 TimeOut
+
+2019/10/20 20:34:55 Serve [2] trying to be leader
+
+2019/10/20 20:34:55 Server [2] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:55 Server [2] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:55 here timeOutTimer
+2019/10/20 20:34:55 Fail or Success
+
+2019/10/20 20:34:55 msg == 
+2019/10/20 20:34:55 TimeOut
+
+2019/10/20 20:34:55 Serve [0] trying to be leader
+
+2019/10/20 20:34:55 Server [0] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:55 Server [0] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:55 here timeOutTimer
+2019/10/20 20:34:55 Fail or Success
+
+2019/10/20 20:34:55 msg == 
+2019/10/20 20:34:55 RecivedVoteRequest
+
+2019/10/20 20:34:55 msg == 
+2019/10/20 20:34:55 msg == 
+2019/10/20 20:34:55 TimeOut
+
+2019/10/20 20:34:55 Serve [0] trying to be leader
+
+2019/10/20 20:34:55 Sever [2] recived server [0]'s voteRequest
+
+2019/10/20 20:34:55 case3
+2019/10/20 20:34:55 Server [0] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:55 Sever [1] recived server [0]'s voteRequest
+
+2019/10/20 20:34:55 case3
+2019/10/20 20:34:55 Server [0] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:55 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:55 here timeOutTimer
+2019/10/20 20:34:55 Fail or Success
+
+2019/10/20 20:34:55 msg == 
+2019/10/20 20:34:55 TimeOut
+
+2019/10/20 20:34:55 Serve [1] trying to be leader
+
+2019/10/20 20:34:55 Server [1] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:55 Server [1] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:55 here timeOutTimer
+2019/10/20 20:34:55 Fail or Success
+
+2019/10/20 20:34:55 msg == 
+2019/10/20 20:34:55 RecivedVoteRequest
+
+2019/10/20 20:34:55 msg == 
+2019/10/20 20:34:55 msg == 
+2019/10/20 20:34:55 RecivedVoteRequest
+
+2019/10/20 20:34:55 msg == 
+2019/10/20 20:34:55 msg == 
+2019/10/20 20:34:55 RecivedVoteRequest
+
+2019/10/20 20:34:55 msg == 
+2019/10/20 20:34:55 msg == 
+2019/10/20 20:34:55 TimeOut
+
+2019/10/20 20:34:55 Serve [2] trying to be leader
+
+2019/10/20 20:34:55 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:55 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:55 Sever [1] recived server [2]'s voteRequest
+
+2019/10/20 20:34:55 case3
+2019/10/20 20:34:55 Sever [0] recived server [2]'s voteRequest
+
+2019/10/20 20:34:55 case3
+2019/10/20 20:34:55 Server [2] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:55 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:55 Server [2] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:55 here timeOutTimer
+2019/10/20 20:34:55 Fail or Success
+
+2019/10/20 20:34:55 msg == 
+2019/10/20 20:34:55 TimeOut
+
+2019/10/20 20:34:55 Serve [2] trying to be leader
+
+2019/10/20 20:34:55 Server [2] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:55 Server [2] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:55 here timeOutTimer
+2019/10/20 20:34:55 Fail or Success
+
+2019/10/20 20:34:55 msg == 
+2019/10/20 20:34:55 RecivedVoteRequest
+
+2019/10/20 20:34:55 msg == 
+2019/10/20 20:34:55 msg == 
+2019/10/20 20:34:55 RecivedVoteRequest
+
+2019/10/20 20:34:55 msg == 
+2019/10/20 20:34:55 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:55 msg == 
+2019/10/20 20:34:55 TimeOut
+
+2019/10/20 20:34:55 Serve [1] trying to be leader
+
+2019/10/20 20:34:55 Sever [2] recived server [1]'s voteRequest
+
+2019/10/20 20:34:55 case3
+2019/10/20 20:34:55 Server [1] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:55 Sever [0] recived server [1]'s voteRequest
+
+2019/10/20 20:34:55 case3
+2019/10/20 20:34:55 Server [1] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:55 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:56 here timeOutTimer
+2019/10/20 20:34:56 Fail or Success
+
+2019/10/20 20:34:56 msg == 
+2019/10/20 20:34:56 TimeOut
+
+2019/10/20 20:34:56 Serve [0] trying to be leader
+
+2019/10/20 20:34:56 Server [0] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:56 Server [0] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:56 here timeOutTimer
+2019/10/20 20:34:56 Fail or Success
+
+2019/10/20 20:34:56 msg == 
+2019/10/20 20:34:56 TimeOut
+
+2019/10/20 20:34:56 Serve [1] trying to be leader
+
+2019/10/20 20:34:56 Server [1] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:56 Server [1] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:56 here timeOutTimer
+2019/10/20 20:34:56 Fail or Success
+
+2019/10/20 20:34:56 msg == 
+2019/10/20 20:34:56 RecivedVoteRequest
+
+2019/10/20 20:34:56 msg == 
+2019/10/20 20:34:56 msg == 
+2019/10/20 20:34:56 TimeOut
+
+2019/10/20 20:34:56 Serve [2] trying to be leader
+
+2019/10/20 20:34:56 Sever [1] recived server [2]'s voteRequest
+
+2019/10/20 20:34:56 case3
+2019/10/20 20:34:56 here timeOutTimer
+2019/10/20 20:34:56 Fail or Success
+
+2019/10/20 20:34:56 msg == 
+2019/10/20 20:34:56 RecivedVoteRequest
+
+2019/10/20 20:34:56 msg == 
+2019/10/20 20:34:56 msg == 
+2019/10/20 20:34:56 RecivedVoteRequest
+
+2019/10/20 20:34:56 msg == 
+2019/10/20 20:34:56 Server [2] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:56 Sever [0] recived server [2]'s voteRequest
+
+2019/10/20 20:34:56 case3
+2019/10/20 20:34:56 Server [2] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:56 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:56 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:56 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:56 msg == 
+2019/10/20 20:34:56 RecivedVoteRequest
+
+2019/10/20 20:34:56 msg == 
+2019/10/20 20:34:56 msg == 
+2019/10/20 20:34:56 TimeOut
+
+2019/10/20 20:34:56 Serve [0] trying to be leader
+
+2019/10/20 20:34:56 Sever [2] recived server [0]'s voteRequest
+
+2019/10/20 20:34:56 case3
+2019/10/20 20:34:56 Server [0] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:56 Sever [1] recived server [0]'s voteRequest
+
+2019/10/20 20:34:56 case3
+2019/10/20 20:34:56 Server [0] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:56 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:56 here timeOutTimer
+2019/10/20 20:34:56 Fail or Success
+
+2019/10/20 20:34:56 msg == 
+2019/10/20 20:34:56 TimeOut
+
+2019/10/20 20:34:56 Serve [0] trying to be leader
+
+2019/10/20 20:34:56 Server [0] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:56 Server [0] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:56 here timeOutTimer
+2019/10/20 20:34:56 Fail or Success
+
+2019/10/20 20:34:56 msg == 
+2019/10/20 20:34:56 TimeOut
+
+2019/10/20 20:34:56 Serve [2] trying to be leader
+
+2019/10/20 20:34:56 Server [2] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:56 Server [2] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:56 here timeOutTimer
+2019/10/20 20:34:56 Fail or Success
+
+2019/10/20 20:34:56 msg == 
+2019/10/20 20:34:56 RecivedVoteRequest
+
+2019/10/20 20:34:56 msg == 
+2019/10/20 20:34:56 msg == 
+2019/10/20 20:34:56 RecivedVoteRequest
+
+2019/10/20 20:34:56 msg == 
+2019/10/20 20:34:56 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:56 msg == 
+2019/10/20 20:34:56 TimeOut
+
+2019/10/20 20:34:56 Serve [1] trying to be leader
+
+2019/10/20 20:34:56 Sever [0] recived server [1]'s voteRequest
+
+2019/10/20 20:34:56 case3
+2019/10/20 20:34:56 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:56 Sever [2] recived server [1]'s voteRequest
+
+2019/10/20 20:34:56 case3
+2019/10/20 20:34:56 Server [1] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:56 Server [1] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:56 here timeOutTimer
+2019/10/20 20:34:56 Fail or Success
+
+2019/10/20 20:34:56 msg == 
+2019/10/20 20:34:56 RecivedVoteRequest
+
+2019/10/20 20:34:56 msg == 
+2019/10/20 20:34:56 msg == 
+2019/10/20 20:34:56 RecivedVoteRequest
+
+2019/10/20 20:34:56 msg == 
+2019/10/20 20:34:56 msg == 
+2019/10/20 20:34:56 TimeOut
+
+2019/10/20 20:34:56 Serve [2] trying to be leader
+
+2019/10/20 20:34:56 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:56 Sever [1] recived server [2]'s voteRequest
+
+2019/10/20 20:34:56 case3
+2019/10/20 20:34:56 Server [2] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:56 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:56 Sever [0] recived server [2]'s voteRequest
+
+2019/10/20 20:34:56 case3
+2019/10/20 20:34:56 Server [2] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:56 here timeOutTimer
+2019/10/20 20:34:56 Fail or Success
+
+2019/10/20 20:34:56 msg == 
+2019/10/20 20:34:56 RecivedVoteRequest
+
+2019/10/20 20:34:56 msg == 
+2019/10/20 20:34:56 msg == 
+2019/10/20 20:34:56 msg == 
+2019/10/20 20:34:56 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:56 RecivedVoteRequest
+
+2019/10/20 20:34:56 msg == 
+2019/10/20 20:34:56 TimeOut
+
+2019/10/20 20:34:56 Serve [0] trying to be leader
+
+2019/10/20 20:34:56 Sever [2] recived server [0]'s voteRequest
+
+2019/10/20 20:34:56 case3
+2019/10/20 20:34:56 Server [0] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:56 Sever [1] recived server [0]'s voteRequest
+
+2019/10/20 20:34:56 case3
+2019/10/20 20:34:56 Server [0] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:56 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:57 here timeOutTimer
+2019/10/20 20:34:57 Fail or Success
+
+2019/10/20 20:34:57 msg == 
+2019/10/20 20:34:57 TimeOut
+
+2019/10/20 20:34:57 Serve [1] trying to be leader
+
+2019/10/20 20:34:57 Server [1] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:57 Server [1] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:57 here timeOutTimer
+2019/10/20 20:34:57 Fail or Success
+
+2019/10/20 20:34:57 msg == 
+2019/10/20 20:34:57 TimeOut
+
+2019/10/20 20:34:57 Serve [0] trying to be leader
+
+2019/10/20 20:34:57 Server [0] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:57 Server [0] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:57 here timeOutTimer
+2019/10/20 20:34:57 Fail or Success
+
+2019/10/20 20:34:57 msg == 
+2019/10/20 20:34:57 TimeOut
+
+2019/10/20 20:34:57 Serve [0] trying to be leader
+
+2019/10/20 20:34:57 Sever [1] recived server [0]'s voteRequest
+
+2019/10/20 20:34:57 case3
+2019/10/20 20:34:57 Sever [2] recived server [0]'s voteRequest
+
+2019/10/20 20:34:57 case3
+2019/10/20 20:34:57 Server [0] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:57 Server [0] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:57 here timeOutTimer
+2019/10/20 20:34:57 Fail or Success
+
+2019/10/20 20:34:57 msg == 
+2019/10/20 20:34:57 RecivedVoteRequest
+
+2019/10/20 20:34:57 msg == 
+2019/10/20 20:34:57 msg == 
+2019/10/20 20:34:57 RecivedVoteRequest
+
+2019/10/20 20:34:57 msg == 
+2019/10/20 20:34:57 msg == 
+2019/10/20 20:34:57 TimeOut
+
+2019/10/20 20:34:57 Serve [2] trying to be leader
+
+2019/10/20 20:34:57 Sever [1] recived server [2]'s voteRequest
+
+2019/10/20 20:34:57 case3
+2019/10/20 20:34:57 send a RecivedVoteRequest msg [---]
+
+2019/10/20 20:34:57 Server [2] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:57 Sever [0] recived server [2]'s voteRequest
+
+2019/10/20 20:34:57 case3
+2019/10/20 20:34:57 Server [2] currentVote : 1, maxVote : 3 
+
+2019/10/20 20:34:57 send a RecivedVoteRequest msg [---]
+
+--- FAIL: TestReElection2A (5.03s)
+    config.go:329: expected one leader, got none
+FAIL
+exit status 1
+FAIL	lab/raft	9.983s

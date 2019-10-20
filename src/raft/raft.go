@@ -17,13 +17,25 @@ package raft
 //   in the same server.
 //
 
-import "sync"
-import "labrpc"
+import (
+	labrpc "lab/labrpc"
+	"math/rand"
+	"sync"
+	"time"
+)
 
 // import "bytes"
 // import "labgob"
 
+//election timeout
+const electionTimeOut = 5000
 
+//show the raft status
+const (
+	Leader    = 0 //leader = 0
+	Candidate = 1 //cnadidate = 1
+	Follower  = 2 //follower = 2
+)
 
 //
 // as each Raft peer becomes aware that successive log entries are
@@ -43,7 +55,38 @@ type ApplyMsg struct {
 }
 
 //
-// A Go object implementing a single Raft peer.
+// LogEntry : the entry of log
+//
+type LogEntry struct {
+	Term    int
+	Command interface{}
+}
+
+//
+// AppendEntries : Append entry for all servers to store
+//
+type AppendEntries struct {
+	Term         int
+	LeaderID     int
+	PrevLogIndex int
+	PrevLogTerm  int
+	Entries      []LogEntry //TODO: change type
+	LeaderCommit int
+}
+
+//AppendEntriesArgs is the AppendEntries
+type AppendEntriesArgs AppendEntries
+
+//
+//AppendEntriesReply reply
+//
+type AppendEntriesReply struct {
+	Term    int
+	Success bool
+}
+
+//
+// Raft :  A Go object implementing a single Raft peer.
 //
 type Raft struct {
 	mu        sync.Mutex          // Lock to protect shared access to this peer's state
@@ -54,19 +97,45 @@ type Raft struct {
 	// Your data here (2A, 2B, 2C).
 	// Look at the paper's Figure 2 for a description of what
 	// state a Raft server must maintain.
+	//Persisitent state on all servers
+	currentTerm int
+	votedFor    interface{} //TODO change the type
+	logs        []LogEntry
 
+	//Volatile state on all servers
+	commitIndex int
+	lastApplied int
+
+	//Volatile state on leaders
+	nextIndex  []int
+	matchIndex []int
+
+	//leader candidate or follower 0 : leaeder, 1 : candidate 2:follower
+	role int
+
+	//vote count
+	voteCnt int
+	//msgChan if appendLogAppend, send msg to msgChan
+	msgChan chan int
+	//timer wait timeout
+	timeOutTimer *time.Timer
 }
 
+//
 // return currentTerm and whether this server
 // believes it is the leader.
+//
 func (rf *Raft) GetState() (int, bool) {
 
 	var term int
 	var isleader bool
 	// Your code here (2A).
+	rf.mu.Lock()
+	term = rf.currentTerm
+	isleader = rf.role == Leader
+	rf.mu.Unlock()
 	return term, isleader
 }
-
 
 //
 // save Raft's persistent state to stable storage,
@@ -83,7 +152,6 @@ func (rf *Raft) persist() {
 	// data := w.Bytes()
 	// rf.persister.SaveRaftState(data)
 }
-
 
 //
 // restore previously persisted state.
@@ -107,30 +175,33 @@ func (rf *Raft) readPersist(data []byte) {
 	// }
 }
 
-
-
-
-//
-// example RequestVote RPC arguments structure.
-// field names must start with capital letters!
-//
-type RequestVoteArgs struct {
-	// Your data here (2A, 2B).
+//update the term
+func (rf *Raft) updateTermLock(newTerm int) bool {
+	//if I am outdated, I must be a follower
+	rf.mu.Lock()
+	defer rf.mu.Unlock()
+	if rf.currentTerm < newTerm {
+		rf.currentTerm = newTerm
+		rf.role = Follower
+		go func() {
+			rf.msgChan <- BecomeFollower
+		}()
+		return true
+	}
+	return false
 }
 
-//
-// example RequestVote RPC reply structure.
-// field names must start with capital letters!
-//
-type RequestVoteReply struct {
-	// Your data here (2A).
-}
+//update applied when response the the rpc
 
-//
-// example RequestVote RPC handler.
-//
-func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
-	// Your code here (2A, 2B).
+func (rf *Raft) updateAppliedLock() bool {
+	rf.mu.Lock()
+	defer rf.mu.Unlock()
+	if rf.commitIndex > rf.lastApplied {
+		rf.lastApplied++
+		//TODO: apply it to state machine
+		return true
+	}
+	return false
 }
 
 //
@@ -162,11 +233,8 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 // that the caller passes the address of the reply struct with &, not
 // the struct itself.
 //
-func (rf *Raft) sendRequestVote(server int, args *RequestVoteArgs, reply *RequestVoteReply) bool {
-	ok := rf.peers[server].Call("Raft.RequestVote", args, reply)
-	return ok
-}
 
+//send AppendEntries
 
 //
 // the service using Raft (e.g. a k/v server) wants to start
@@ -189,7 +257,6 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 
 	// Your code here (2B).
 
-
 	return index, term, isLeader
 }
 
@@ -201,6 +268,10 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 //
 func (rf *Raft) Kill() {
 	// Your code here, if desired.
+}
+
+func randomTimeOut() time.Duration {
+	return time.Duration((rand.Int()%500 + 500)) * time.Millisecond
 }
 
 //
@@ -220,12 +291,95 @@ func Make(peers []*labrpc.ClientEnd, me int,
 	rf.peers = peers
 	rf.persister = persister
 	rf.me = me
-
+	rf.role = Follower
 	// Your initialization code here (2A, 2B, 2C).
+	rf.currentTerm = 0
+	rf.votedFor = nil
+	rf.logs = make([]LogEntry, 1, 10)
+	rf.commitIndex = 0
+	rf.lastApplied = 0
+	rf.nextIndex = make([]int, len(peers))
+	rf.matchIndex = make([]int, len(peers))
+	rf.msgChan = make(chan int, 1)
 
+	for i := range rf.nextIndex {
+		rf.nextIndex[i] = 1
+		rf.matchIndex[i] = 0
+	}
+	DPrintf("here now : %d\n\n", me)
 	// initialize from state persisted before a crash
 	rf.readPersist(persister.ReadRaftState())
 
+	go func() {
+		rf.timeOutTimer = time.AfterFunc(randomTimeOut(), func() {
+			rf.msgChan <- TimeOut
+		})
+		for {
+			//timeout
+			select {
+			case applyMsg := <-applyCh:
+				rf.mu.Lock()
+				isLeader := rf.role == Leader
+				rf.mu.Unlock()
+				if isLeader {
+					rf.logDuplicate(&applyMsg) //TODO: handle result
+				} else {
+					applyCh <- applyMsg
+				}
+			case msg := <-rf.msgChan: //use the msg chan results
+				DPrintf("msg == ")
+				switch msg {
+				case TimeOut:
+					DPrintf("TimeOut\n\n")
+				case RecivedVoteRequest:
+					DPrintf("RecivedVoteRequest\n\n")
+				}
+				if msg == TimeOut {
+					rf.mu.Lock()
+					isLeader := rf.role == Leader
+					rf.mu.Unlock()
 
+					if msg == TimeOut {
+						if !isLeader {
+							//disable this timer  to use the timer in tryToBeLeader
+							rf.timeOutTimer.Reset(time.Hour)
+							//
+							DPrintf("Serve [%d] trying to be leader\n\n", rf.me)
+							res := rf.tryToBeLeader()
+							DPrintf("Fail or Success\n\n")
+							if res == BecomeLeader {
+								rf.mu.Lock()
+								rf.role = Leader
+								rf.mu.Unlock()
+								rf.logDuplicate(nil)
+
+								rf.mu.Lock()
+								rf.timeOutTimer.Reset(randomTimeOut())
+								rf.mu.Unlock()
+							} else if res == TimeOut {
+								//if election end because of timeout, you should start next election at once
+								rf.mu.Lock()
+								rf.timeOutTimer.Reset(0)
+								rf.mu.Unlock()
+							}
+						} else {
+							rf.logDuplicate(nil)
+							rf.mu.Lock()
+							rf.timeOutTimer.Reset(randomTimeOut())
+							rf.mu.Unlock()
+						}
+					} else {
+						rf.mu.Lock()
+						rf.timeOutTimer.Reset(randomTimeOut())
+						rf.mu.Unlock()
+					}
+				}
+
+			}
+
+		}
+
+	}()
+	DPrintf("End Now %d \n\n", me)
 	return rf
 }
