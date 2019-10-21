@@ -183,6 +183,7 @@ func (rf *Raft) updateTermLock(newTerm int) bool {
 	if rf.currentTerm < newTerm {
 		rf.currentTerm = newTerm
 		rf.role = Follower
+		rf.votedFor = nil
 		go func() {
 			rf.msgChan <- BecomeFollower
 		}()
@@ -256,6 +257,14 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 	isLeader := true
 
 	// Your code here (2B).
+	rf.mu.Lock()
+	index = len(rf.logs) + 1
+	term = rf.currentTerm
+	isLeader = rf.role == Leader
+	rf.mu.Unlock()
+	if isLeader {
+
+	}
 
 	return index, term, isLeader
 }
@@ -271,7 +280,7 @@ func (rf *Raft) Kill() {
 }
 
 func randomTimeOut() time.Duration {
-	return time.Duration((rand.Int()%500 + 500)) * time.Millisecond
+	return time.Duration((rand.Int()%1000 + 1000)) * time.Millisecond
 }
 
 //
@@ -302,84 +311,56 @@ func Make(peers []*labrpc.ClientEnd, me int,
 	rf.matchIndex = make([]int, len(peers))
 	rf.msgChan = make(chan int, 1)
 
-	for i := range rf.nextIndex {
+	for i := 0; i < len(peers); i++ {
 		rf.nextIndex[i] = 1
 		rf.matchIndex[i] = 0
 	}
-	DPrintf("here now : %d\n\n", me)
+
 	// initialize from state persisted before a crash
 	rf.readPersist(persister.ReadRaftState())
 
 	go func() {
-		rf.timeOutTimer = time.AfterFunc(randomTimeOut(), func() {
-			rf.msgChan <- TimeOut
-		})
 		for {
-			//timeout
+			timer := time.NewTimer(randomTimeOut())
+
 			select {
+			case <-timer.C:
+				rf.mu.Lock()
+				isLeader := rf.role == Leader
+				rf.mu.Unlock()
+				if isLeader {
+					go rf.logDuplicate(nil)
+				} else {
+					DPrintf("Server[%d] try to be a leader\n", rf.me)
+					for {
+						res := rf.tryToBeLeader()
+						if res == BecomeLeader {
+							rf.mu.Lock()
+							rf.role = Leader
+							rf.mu.Unlock()
+							go rf.logDuplicate(nil)
+							break
+						} else if res == BecomeFollower {
+							break
+						}
+					}
+				}
 			case applyMsg := <-applyCh:
 				rf.mu.Lock()
 				isLeader := rf.role == Leader
 				rf.mu.Unlock()
 				if isLeader {
-					rf.logDuplicate(&applyMsg) //TODO: handle result
+					go rf.logDuplicate(&applyMsg) //TODO: handle result
 				} else {
 					applyCh <- applyMsg
 				}
-			case msg := <-rf.msgChan: //use the msg chan results
-				DPrintf("msg == ")
-				switch msg {
-				case TimeOut:
-					DPrintf("TimeOut\n\n")
-				case RecivedVoteRequest:
-					DPrintf("RecivedVoteRequest\n\n")
-				}
-				if msg == TimeOut {
-					rf.mu.Lock()
-					isLeader := rf.role == Leader
-					rf.mu.Unlock()
-
-					if msg == TimeOut {
-						if !isLeader {
-							//disable this timer  to use the timer in tryToBeLeader
-							rf.timeOutTimer.Reset(time.Hour)
-							//
-							DPrintf("Serve [%d] trying to be leader\n\n", rf.me)
-							res := rf.tryToBeLeader()
-							DPrintf("Fail or Success\n\n")
-							if res == BecomeLeader {
-								rf.mu.Lock()
-								rf.role = Leader
-								rf.mu.Unlock()
-								rf.logDuplicate(nil)
-
-								rf.mu.Lock()
-								rf.timeOutTimer.Reset(randomTimeOut())
-								rf.mu.Unlock()
-							} else if res == TimeOut {
-								//if election end because of timeout, you should start next election at once
-								rf.mu.Lock()
-								rf.timeOutTimer.Reset(0)
-								rf.mu.Unlock()
-							}
-						} else {
-							rf.logDuplicate(nil)
-							rf.mu.Lock()
-							rf.timeOutTimer.Reset(randomTimeOut())
-							rf.mu.Unlock()
-						}
-					} else {
-						rf.mu.Lock()
-						rf.timeOutTimer.Reset(randomTimeOut())
-						rf.mu.Unlock()
-					}
-				}
-
+			case <-rf.msgChan:
+				rf.mu.Lock()
+				rf.votedFor = nil
+				rf.mu.Unlock()
 			}
-
 		}
-
 	}()
-	DPrintf("End Now %d \n\n", me)
+
 	return rf
 }

@@ -9,21 +9,27 @@ func (rf *Raft) recviedAppendEntries() {
 //
 func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply) {
 	go rf.recviedAppendEntries()
-	defer rf.updateTermLock(args.Term)
-	defer rf.updateAppliedLock()
 
+	defer rf.updateAppliedLock()
+	rf.updateTermLock(args.Term)
+	rf.mu.Lock()
 	reply.Term = rf.currentTerm
+	logsLen := len(rf.logs)
+	rf.mu.Unlock()
+
 	reply.Success = false
 
 	//case1 => the sender is not a leader
 	if args.Term < rf.currentTerm {
+		//DPrintf("case 1  => the sender is not a leader server[%d]'s term %d, leader's Term %d", rf.me, rf.currentTerm, args.Term)
 		return
 	}
 
 	//case2 => pre log does not match
-	logsLen := len(rf.logs)
+
 	//TODO: handler the corner case
 	if logsLen < args.PrevLogIndex || rf.logs[args.PrevLogIndex].Term != args.PrevLogTerm {
+		DPrintf("/case2 => pre log does not match")
 		return
 	}
 
@@ -48,7 +54,7 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 		i++
 	}
 	rf.mu.Unlock()
-
+	DPrintf("case4 append new entry")
 	//case5 => update commitIndex
 	if rf.commitIndex < args.LeaderCommit {
 		if args.LeaderCommit < args.PrevLogIndex+len(args.Entries) {
@@ -61,17 +67,23 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 
 func (rf *Raft) sendAppendEntries(server int, args *AppendEntriesArgs, reply *AppendEntriesReply) bool {
 
-	ok := rf.peers[server].Call("Raft.AppendEntries", args, reply)
-	ok = ok && reply.Success
+	for !rf.peers[server].Call("Raft.AppendEntries", args, reply) {
+
+	}
+	ok := reply.Success
+	if rf.updateTermLock(reply.Term) {
+		DPrintf("Sever[%d] I am not a leader now", rf.me)
+		return false
+	}
 	rf.mu.Lock()
 	if !reply.Success {
 		rf.nextIndex[server]--
-	} else {
+	} else if args.Entries != nil {
 		rf.matchIndex[server] = rf.nextIndex[server]
 		rf.nextIndex[server]++
 	}
 	rf.mu.Unlock()
-	ok = ok && !rf.updateTermLock(reply.Term)
+
 	return ok
 }
 
@@ -85,22 +97,27 @@ func (rf *Raft) logDuplicate(applyMsg *ApplyMsg) int {
 	if applyMsg == nil {
 		appendEntryTemplate.Entries = nil
 	}
-	rf.mu.Lock()
-	
-	rf.mu.Lock()
+	var logsLen int
+	if applyMsg != nil {
+		rf.mu.Lock()
+		logsLen = len(rf.logs)
+		rf.logs = append(rf.logs, LogEntry{Term: rf.currentTerm, Command: applyMsg})
+		rf.mu.Lock()
+	}
+
 	totalPeers := len(rf.peers)
 	currentSuccessNum := 1
 	currentSendNum := 1
-	logChan = make(chan bool, 1)
-	dupEndChan = make(chan bool, 1)
+	logChan := make(chan bool, 1)
+	dupEndChan := make(chan bool, 1)
 	go func() {
 		for {
-			ok := <- logChan
-			currentSuccessNum++
+			ok := <-logChan
+			currentSendNum++
 			if ok {
 				currentSuccessNum++
 			}
-			if currentSuccessNum >= (totalPeers + 1) / 2{
+			if currentSendNum >= (totalPeers+1)/2 {
 				dupEndChan <- true
 			}
 		}
@@ -111,23 +128,36 @@ func (rf *Raft) logDuplicate(applyMsg *ApplyMsg) int {
 			go func(idx int) {
 				args := appendEntryTemplate
 				reply := AppendEntriesReply{}
+
+				rf.mu.Lock()
+				args.Term = rf.currentTerm
 				args.PrevLogIndex = rf.nextIndex[idx] - 1
 				args.PrevLogTerm = rf.logs[rf.nextIndex[idx]-1].Term
+
 				if applyMsg == nil {
 					args.Entries = nil
 				} else {
-					args.Entries = make([]LogEntry, 0)
-					args.Entries = append(args.Entries, rf.logs[rf.nextIndex[idx]])
+
+					//TODO: maybe exist corner case
+					if rf.nextIndex[idx] <= logsLen {
+						args.Entries = rf.logs[rf.nextIndex[idx] : logsLen+1]
+					}
+
 				}
-				for ok := rf.sendAppendEntries(idx, &args, &reply); !ok {
+				rf.mu.Unlock()
+				for rf.sendAppendEntries(idx, &args, &reply) {
 				}
 				go func() {
-					logChan <- true	
+					logChan <- true
 				}()
-
 			}(i)
 		}
 	}
-	<- dupEndChan
+	<-dupEndChan
+	rf.mu.Lock()
+	if rf.role == Leader {
+		rf.commitIndex = logsLen
+	}
+	rf.mu.Unlock()
 	return 1
 }

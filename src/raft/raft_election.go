@@ -41,9 +41,10 @@ type RequestVoteReply struct {
 // reciver : follower
 //
 func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
-	defer rf.updateTermLock(args.Term)
+
 	defer rf.updateAppliedLock()
 	//Your code here (2A, 2B).
+	rf.updateTermLock(args.Term)
 	go func() {
 		rf.msgChan <- RecivedVoteRequest
 		DPrintf("send a RecivedVoteRequest msg [---]\n\n")

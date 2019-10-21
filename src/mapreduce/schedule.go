@@ -46,7 +46,7 @@ func schedule(jobName string, mapFiles []string, nReduce int, phase jobPhase, re
 			done := make(chan struct{}, 1)
 			doneChan = append(doneChan, done)
 			doneChan[len(doneChan)-1] <- (struct{}{})
-			if len(workers) >= 1 {
+			if len(workers) == 1 {
 				newCond.Broadcast()
 			}
 			mutex.Unlock()
@@ -75,19 +75,33 @@ func schedule(jobName string, mapFiles []string, nReduce int, phase jobPhase, re
 		idx := i
 		go func() {
 			defer wg.Done()
-
 			var worker string
 			var lenWork int
+			var done chan struct{}
 			mutex.Lock()
 			if len(workers) == 0 {
 				newCond.Wait()
 			}
-			worker = workers[idx%len(workers)]
 			lenWork = len(workers)
+			worker = workers[idx%len(workers)]
+			done = doneChan[idx%lenWork]
 			mutex.Unlock()
-			<-doneChan[idx%lenWork]
-			call(worker, "Worker.DoTask", args, nil)
-			doneChan[idx%lenWork] <- (struct{}{})
+
+			for {
+				<-done
+				if call(worker, "Worker.DoTask", args, nil) {
+					done <- (struct{}{})
+					break
+				} else {
+					done <- (struct{}{})
+					idx++
+					mutex.Lock()
+					lenWork = len(workers)
+					worker = workers[idx%len(workers)]
+					done = doneChan[idx%lenWork]
+					mutex.Unlock()
+				}
+			}
 		}()
 	}
 	wg.Wait()

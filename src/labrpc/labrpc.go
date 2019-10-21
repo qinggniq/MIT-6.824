@@ -49,15 +49,17 @@ package labrpc
 //   pass svc to srv.AddService()
 //
 
-import "labgob"
-import "bytes"
-import "reflect"
-import "sync"
-import "log"
-import "strings"
-import "math/rand"
-import "time"
-import "sync/atomic"
+import (
+	"bytes"
+	labgob "lab/labgob"
+	"log"
+	"math/rand"
+	"reflect"
+	"strings"
+	"sync"
+	"sync/atomic"
+	"time"
+)
 
 type reqMsg struct {
 	endname  interface{} // name of sending ClientEnd
@@ -391,6 +393,7 @@ func (rs *Server) dispatch(req reqMsg) replyMsg {
 
 	// split Raft.AppendEntries into service and method
 	dot := strings.LastIndex(req.svcMeth, ".")
+	//fmt.Printf("dot pos : %d req.svcMeth = %v\n\n\n === ", dot, req.svcMeth)
 	serviceName := req.svcMeth[:dot]
 	methodName := req.svcMeth[dot+1:]
 
