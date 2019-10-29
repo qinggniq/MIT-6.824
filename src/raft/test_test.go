@@ -8,12 +8,14 @@ package raft
 // test with the original before submitting.
 //
 
-import "testing"
-import "fmt"
-import "time"
-import "math/rand"
-import "sync/atomic"
-import "sync"
+import (
+	"fmt"
+	"math/rand"
+	"sync"
+	"sync/atomic"
+	"testing"
+	"time"
+)
 
 // The tester generously allows solutions to complete elections in one second
 // (much more than the paper's range of timeouts).
@@ -55,7 +57,7 @@ func TestReElection2A(t *testing.T) {
 	cfg.begin("Test (2A): election after network failure")
 
 	leader1 := cfg.checkOneLeader()
-
+	DPrintf("[leader1] : %d\n", leader1)
 	// if the leader disconnects, a new one should be elected.
 	cfg.disconnect(leader1)
 	cfg.checkOneLeader()
@@ -64,6 +66,7 @@ func TestReElection2A(t *testing.T) {
 	// disturb the new leader.
 	cfg.connect(leader1)
 	leader2 := cfg.checkOneLeader()
+	DPrintf("[leader2] : %d\n", leader2)
 
 	// if there's no quorum, no leader should
 	// be elected.
@@ -118,7 +121,7 @@ func TestFailAgree2B(t *testing.T) {
 	// follower network disconnection
 	leader := cfg.checkOneLeader()
 	cfg.disconnect((leader + 1) % servers)
-
+	DPrintf("disconnect Server[%d]\n", (leader+1)%servers)
 	// agree despite one disconnected server?
 	cfg.one(102, servers-1, false)
 	cfg.one(103, servers-1, false)
@@ -128,10 +131,12 @@ func TestFailAgree2B(t *testing.T) {
 
 	// re-connect
 	cfg.connect((leader + 1) % servers)
-
+	DPrintf("reconnect Server[%d]\n", (leader+1)%servers)
 	// agree with full set of servers?
+	DPrintf("[Error 107]")
 	cfg.one(106, servers, true)
 	time.Sleep(RaftElectionTimeout)
+	DPrintf("[error 107]")
 	cfg.one(107, servers, true)
 
 	cfg.end()
@@ -241,6 +246,7 @@ loop:
 		failed := false
 		cmds := []int{}
 		for index := range is {
+			DPrintf("index : %d", index)
 			cmd := cfg.wait(index, servers, term)
 			if ix, ok := cmd.(int); ok {
 				if ix == -1 {
@@ -341,7 +347,7 @@ func TestBackup2B(t *testing.T) {
 	cfg.disconnect((leader1 + 2) % servers)
 	cfg.disconnect((leader1 + 3) % servers)
 	cfg.disconnect((leader1 + 4) % servers)
-
+	DPrintf("[here1]")
 	// submit lots of commands that won't commit
 	for i := 0; i < 50; i++ {
 		cfg.rafts[leader1].Start(rand.Int())
@@ -356,12 +362,13 @@ func TestBackup2B(t *testing.T) {
 	cfg.connect((leader1 + 2) % servers)
 	cfg.connect((leader1 + 3) % servers)
 	cfg.connect((leader1 + 4) % servers)
-
+	DPrintf("[here2]")
 	// lots of successful commands to new group.
 	for i := 0; i < 50; i++ {
-		cfg.one(rand.Int(), 3, true)
+		//cfg.one(rand.Int(), 3, true)
+		cfg.one(i, 3, true)
 	}
-
+	DPrintf("[here3]")
 	// now another partitioned leader and one follower
 	leader2 := cfg.checkOneLeader()
 	other := (leader1 + 2) % servers
@@ -369,10 +376,11 @@ func TestBackup2B(t *testing.T) {
 		other = (leader2 + 1) % servers
 	}
 	cfg.disconnect(other)
-
+	DPrintf("[here4]")
 	// lots more commands that won't commit
 	for i := 0; i < 50; i++ {
-		cfg.rafts[leader2].Start(rand.Int())
+		//cfg.rafts[leader2].Start(rand.Int())
+		cfg.rafts[leader2].Start(i)
 	}
 
 	time.Sleep(RaftElectionTimeout / 2)
@@ -384,18 +392,19 @@ func TestBackup2B(t *testing.T) {
 	cfg.connect((leader1 + 0) % servers)
 	cfg.connect((leader1 + 1) % servers)
 	cfg.connect(other)
-
+	DPrintf("[here5]")
 	// lots of successful commands to new group.
 	for i := 0; i < 50; i++ {
-		cfg.one(rand.Int(), 3, true)
+		//cfg.one(rand.Int(), 3, true)
+		cfg.one(i, 3, true)
 	}
-
+	DPrintf("[here6]")
 	// now everyone
 	for i := 0; i < servers; i++ {
 		cfg.connect(i)
 	}
-	cfg.one(rand.Int(), servers, true)
-
+	//cfg.one(rand.Int(), servers, true)
+	cfg.one(4, servers, true)
 	cfg.end()
 }
 

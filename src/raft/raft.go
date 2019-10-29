@@ -81,8 +81,9 @@ type AppendEntriesArgs AppendEntries
 //AppendEntriesReply reply
 //
 type AppendEntriesReply struct {
-	Term    int
-	Success bool
+	Term            int
+	Success         bool
+	EffectiveAppend int
 }
 
 //
@@ -119,6 +120,9 @@ type Raft struct {
 	msgChan chan int
 	//timer wait timeout
 	timeOutTimer *time.Timer
+
+	//apply msg chan
+	applyChan chan ApplyMsg
 }
 
 //
@@ -196,12 +200,26 @@ func (rf *Raft) updateTermLock(newTerm int) bool {
 
 func (rf *Raft) updateAppliedLock() bool {
 	rf.mu.Lock()
-	defer rf.mu.Unlock()
+
 	if rf.commitIndex > rf.lastApplied {
+
 		rf.lastApplied++
-		//TODO: apply it to state machine
+		applyMsg := ApplyMsg{
+			CommandValid: true,
+			Command:      rf.logs[rf.lastApplied].Command,
+			CommandIndex: rf.lastApplied,
+		}
+		rf.mu.Unlock()
+		go func(applyMsg ApplyMsg) {
+			rf.mu.Lock()
+			DPrintf("Leader[%d] apply %v", rf.me, applyMsg)
+			rf.mu.Unlock()
+			rf.applyChan <- applyMsg
+		}(applyMsg)
 		return true
+
 	}
+	rf.mu.Unlock()
 	return false
 }
 
@@ -251,22 +269,29 @@ func (rf *Raft) updateAppliedLock() bool {
 // term. the third return value is true if this server believes it is
 // the leader.
 //
+
 func (rf *Raft) Start(command interface{}) (int, int, bool) {
+
 	index := -1
 	term := -1
 	isLeader := true
 
 	// Your code here (2B).
 	rf.mu.Lock()
-	index = len(rf.logs) + 1
-	term = rf.currentTerm
+	defer rf.mu.Unlock()
 	isLeader = rf.role == Leader
-	rf.mu.Unlock()
+
 	if isLeader {
-
+		index = len(rf.logs)
+		rf.logs = append(rf.logs, LogEntry{Term: rf.currentTerm, Command: command})
+		term = rf.currentTerm
+		DPrintf("Command {%v}, rf.logs %v", command, rf.logs)
+		go rf.logDuplicate(command)
+	} else {
+		term = rf.currentTerm
 	}
-
 	return index, term, isLeader
+
 }
 
 //
@@ -279,8 +304,14 @@ func (rf *Raft) Kill() {
 	// Your code here, if desired.
 }
 
-func randomTimeOut() time.Duration {
-	return time.Duration((rand.Int()%1000 + 1000)) * time.Millisecond
+func randomTimeOut(isLeader bool) time.Duration {
+	var div int
+	if isLeader {
+		div = 2
+	} else {
+		div = 1
+	}
+	return time.Duration((rand.Int()%500+1000)/div) * time.Millisecond
 }
 
 //
@@ -310,7 +341,11 @@ func Make(peers []*labrpc.ClientEnd, me int,
 	rf.nextIndex = make([]int, len(peers))
 	rf.matchIndex = make([]int, len(peers))
 	rf.msgChan = make(chan int, 1)
+	rf.applyChan = applyCh
 
+	// go func() {
+	// 	rf.applyChan <- ApplyMsg{CommandValid: true, Command: 1, CommandIndex: 0}
+	// }()
 	for i := 0; i < len(peers); i++ {
 		rf.nextIndex[i] = 1
 		rf.matchIndex[i] = 0
@@ -321,23 +356,32 @@ func Make(peers []*labrpc.ClientEnd, me int,
 
 	go func() {
 		for {
-			timer := time.NewTimer(randomTimeOut())
+			rf.mu.Lock()
+			isLeader := rf.role == Leader
+			rf.mu.Unlock()
 
 			select {
-			case <-timer.C:
+			case <-time.After(randomTimeOut(isLeader)):
 				rf.mu.Lock()
-				isLeader := rf.role == Leader
+				isLeader = rf.role == Leader
 				rf.mu.Unlock()
+
 				if isLeader {
+					go rf.updateAppliedLock()
 					go rf.logDuplicate(nil)
 				} else {
-					DPrintf("Server[%d] try to be a leader\n", rf.me)
 					for {
 						res := rf.tryToBeLeader()
+						DPrintf("server [%d] to  be leader", rf.me)
 						if res == BecomeLeader {
 							rf.mu.Lock()
 							rf.role = Leader
+							for i := 0; i < len(rf.peers); i++ {
+								rf.nextIndex[i] = len(rf.logs)
+								rf.matchIndex[i] = 0
+							}
 							rf.mu.Unlock()
+
 							go rf.logDuplicate(nil)
 							break
 						} else if res == BecomeFollower {
@@ -345,19 +389,7 @@ func Make(peers []*labrpc.ClientEnd, me int,
 						}
 					}
 				}
-			case applyMsg := <-applyCh:
-				rf.mu.Lock()
-				isLeader := rf.role == Leader
-				rf.mu.Unlock()
-				if isLeader {
-					go rf.logDuplicate(&applyMsg) //TODO: handle result
-				} else {
-					applyCh <- applyMsg
-				}
 			case <-rf.msgChan:
-				rf.mu.Lock()
-				rf.votedFor = nil
-				rf.mu.Unlock()
 			}
 		}
 	}()

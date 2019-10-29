@@ -47,7 +47,6 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	rf.updateTermLock(args.Term)
 	go func() {
 		rf.msgChan <- RecivedVoteRequest
-		DPrintf("send a RecivedVoteRequest msg [---]\n\n")
 	}()
 	reply.VoteCranted = false
 	var votedFor interface{}
@@ -62,37 +61,31 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	rf.mu.Lock()
 	reply.Term = rf.currentTerm
 	currentTerm = rf.currentTerm
-	currentLastLogIndex = len(rf.logs) //TODO: fix the length corner case
+	currentLastLogIndex = len(rf.logs) - 1 //TODO: fix the length corner case
 	currentLastLogTerm = rf.logs[len(rf.logs)-1].Term
 	votedFor = rf.votedFor
 	isLeader = rf.role == Leader
-	DPrintf("Sever [%d] recived server [%d]'s voteRequest\n\n", rf.me, args.CandidateID)
 	rf.mu.Unlock()
 
 	//case 0 => I'm leader, so you must stop election
 	if isLeader {
-		DPrintf("case0\n")
 		return
 	}
 
 	//case 1 => the candidate is not suit to be voted
 	if currentTerm > candidateTerm {
-		DPrintf("case1\n")
 		return
 	}
 
 	//case 2 => the candidate's log is not lastest than the follwer
 	if currentLastLogTerm > candidateLastLogTerm || (currentLastLogTerm == candidateLastLogTerm && currentLastLogIndex > candidateLastLogIndex) {
-		DPrintf("case2\n")
 		return
 	}
 
 	//case3 => I have voted and is not you
 	if votedFor != nil && votedFor != candidateID {
-		DPrintf("case3\n")
 		return
 	}
-	DPrintf("Sever [%d] decide to vote [%d]\n\n", rf.me, args.CandidateID)
 
 	//now I will vote you
 	rf.mu.Lock()
@@ -118,23 +111,28 @@ func (rf *Raft) tryToBeLeader() int {
 	rf.currentTerm++
 	rf.votedFor = rf.me
 	rf.role = Candidate
-	//rf.timer.Reset(time.Duration(rand.Int())) //TODO: give a random or use sleep
 	maxVoteNum = len(rf.peers)
 
 	templateArgs.Term = rf.currentTerm
 	templateArgs.CandidateID = rf.me
-	//DPrintf("Server [%d]  logs : %v\n\n", rf.me, rf.logs)
 	templateArgs.LastLogTerm = rf.logs[len(rf.logs)-1].Term
-	templateArgs.LastLogIndex = len(rf.logs)
+	templateArgs.LastLogIndex = len(rf.logs) - 1
 	rf.mu.Unlock()
 
 	//channel to notify  timeout or be leader
 	electionEnd := make(chan int, 1)
 	//start timeout
 	go func() {
-		time.Sleep(randomTimeOut()) //TODO: give a random or use sleep
-		DPrintf("here timeOutTimer\n")
-		electionEnd <- TimeOut
+		time.Sleep(randomTimeOut(false)) //TODO: give a random or use sleep
+		var reason int
+		rf.mu.Lock()
+		if rf.role == Follower {
+			reason = BecomeFollower
+		} else {
+			reason = TimeOut
+		}
+		rf.mu.Unlock()
+		electionEnd <- reason
 	}()
 
 	//waitGroup to wait for the most goroutine wake
@@ -150,32 +148,26 @@ func (rf *Raft) tryToBeLeader() int {
 			if ok {
 				currentSuccessNum++
 			}
-			DPrintf("Server [%d] currentVote : %d, maxVote : %d \n\n", rf.me, currentSuccessNum, maxVoteNum)
-			if currentSuccessNum >= (maxVoteNum+1)/2 {
-
+			if currentSuccessNum >= (maxVoteNum)/2+1 {
 				electionEnd <- BecomeLeader
 				return
 			}
 			if currentVoteNum >= maxVoteNum {
-				//when recived all vote but can not be leader
 				return
 			}
 		}
 	}()
 
-	// wg.Add(maxVoteNum - 1)
 	for i := 0; i < maxVoteNum; i++ {
 		if i != rf.me {
 			go func(idx int) {
 				args := templateArgs
 				var reply RequestVoteReply
 				ok := rf.sendRequestVote(idx, &args, &reply)
-				//DPrintf("recived %d reply", idx)
 				var aLeaderComeUp bool
 				rf.mu.Lock()
 				aLeaderComeUp = rf.role != Candidate
 				rf.mu.Unlock()
-				//DPrintf("aLeaderComeUp ? %v", aLeaderComeUp)
 				if aLeaderComeUp {
 					go func() { electionEnd <- BecomeFollower }()
 				} else {
