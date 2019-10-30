@@ -1,7 +1,7 @@
 package raft
 
 import (
-	"time"
+	"sync"
 )
 
 //end reson
@@ -42,12 +42,9 @@ type RequestVoteReply struct {
 //
 func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 
-	defer rf.updateAppliedLock()
+	//defer rf.updateAppliedLock()
 	//Your code here (2A, 2B).
 	rf.updateTermLock(args.Term)
-	go func() {
-		rf.msgChan <- RecivedVoteRequest
-	}()
 	reply.VoteCranted = false
 	var votedFor interface{}
 	var isLeader bool
@@ -59,13 +56,15 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	candidateLastLogTerm = args.LastLogTerm
 
 	rf.mu.Lock()
+	defer rf.mu.Unlock()
 	reply.Term = rf.currentTerm
 	currentTerm = rf.currentTerm
 	currentLastLogIndex = len(rf.logs) - 1 //TODO: fix the length corner case
 	currentLastLogTerm = rf.logs[len(rf.logs)-1].Term
 	votedFor = rf.votedFor
 	isLeader = rf.role == Leader
-	rf.mu.Unlock()
+
+	//DPrintf("[DEBUG] c %d  %d-- f %d %d %v", candidateID, candidateLastLogTerm, rf.me, currentLastLogTerm, rf.logs)
 
 	//case 0 => I'm leader, so you must stop election
 	if isLeader {
@@ -86,96 +85,77 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	if votedFor != nil && votedFor != candidateID {
 		return
 	}
-
 	//now I will vote you
-	rf.mu.Lock()
 	rf.votedFor = candidateID
-	rf.mu.Unlock()
+	go func() {
+		rf.msgChan <- RecivedVoteRequest
+	}()
 	reply.VoteCranted = true
 	return
 }
 
 func (rf *Raft) sendRequestVote(server int, args *RequestVoteArgs, reply *RequestVoteReply) bool {
 	ok := rf.peers[server].Call("Raft.RequestVote", args, reply)
+	if rf.updateTermLock(reply.Term) {
+		return false
+	}
+	rf.mu.Lock()
+	if rf.currentTerm != args.Term {
+		rf.mu.Unlock()
+		return false
+	}
+	rf.mu.Unlock()
 	ok = ok && reply.VoteCranted
-	ok = ok && !rf.updateTermLock(reply.Term)
+
 	return ok
 }
 
 //a follower try to elect the other servers' vote to be a leader
-func (rf *Raft) tryToBeLeader() int {
+func (rf *Raft) tryToBeLeader() {
 	//Step 1
-	var maxVoteNum, currentVoteNum, currentSuccessNum int
+	DPrintf("[DEBUG] : Sever %d, Status %d", rf.me, rf.role)
+	var maxVoteNum, currentSuccessNum int
 	var templateArgs RequestVoteArgs
 	rf.mu.Lock()
 	rf.currentTerm++
 	rf.votedFor = rf.me
 	rf.role = Candidate
 	maxVoteNum = len(rf.peers)
-
-	templateArgs.Term = rf.currentTerm
-	templateArgs.CandidateID = rf.me
-	templateArgs.LastLogTerm = rf.logs[len(rf.logs)-1].Term
-	templateArgs.LastLogIndex = len(rf.logs) - 1
 	rf.mu.Unlock()
 
-	//channel to notify  timeout or be leader
-	electionEnd := make(chan int, 1)
-	//start timeout
-	go func() {
-		time.Sleep(randomTimeOut(false)) //TODO: give a random or use sleep
-		var reason int
-		rf.mu.Lock()
-		if rf.role == Follower {
-			reason = BecomeFollower
-		} else {
-			reason = TimeOut
-		}
-		rf.mu.Unlock()
-		electionEnd <- reason
-	}()
-
-	//waitGroup to wait for the most goroutine wake
-	//var wg sync.WaitGroup
-	voteChan := make(chan bool, 1)
-	currentVoteNum = 1
 	currentSuccessNum = 1
-	//go routine to wait the majority server to voted me
-	go func() {
-		for {
-			ok := <-voteChan
-			currentVoteNum++
-			if ok {
-				currentSuccessNum++
-			}
-			if currentSuccessNum >= (maxVoteNum)/2+1 {
-				electionEnd <- BecomeLeader
-				return
-			}
-			if currentVoteNum >= maxVoteNum {
-				return
-			}
-		}
-	}()
-
+	var mutex sync.Mutex
 	for i := 0; i < maxVoteNum; i++ {
 		if i != rf.me {
 			go func(idx int) {
+				rf.mu.Lock()
+				templateArgs.Term = rf.currentTerm
+				templateArgs.CandidateID = rf.me
+				templateArgs.LastLogTerm = rf.logs[len(rf.logs)-1].Term
+				templateArgs.LastLogIndex = len(rf.logs) - 1
+				rf.mu.Unlock()
+
 				args := templateArgs
 				var reply RequestVoteReply
 				ok := rf.sendRequestVote(idx, &args, &reply)
 				var aLeaderComeUp bool
 				rf.mu.Lock()
-				aLeaderComeUp = rf.role != Candidate
+				aLeaderComeUp = rf.role == Follower
 				rf.mu.Unlock()
 				if aLeaderComeUp {
-					go func() { electionEnd <- BecomeFollower }()
+					rf.msgChan <- BecomeFollower
 				} else {
-					go func() { voteChan <- ok }()
+					if ok {
+						mutex.Lock()
+						currentSuccessNum++
+						mutex.Unlock()
+						if currentSuccessNum >= maxVoteNum/2+1 {
+							rf.msgChan <- BecomeLeader
+						}
+					}
 				}
 			}(i)
 		}
 	}
-	result := <-electionEnd
-	return result
+
 }

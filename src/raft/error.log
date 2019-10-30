@@ -1,0 +1,21 @@
+1. 只有投票 或者 是**当前**的Leader发过来包才重置子的定时器
+2. 当有一个更高Term的Leader请求投票，那么即使自己投票了也要投给他
+3. append Entries第五个检查必须搞起来
+4. apply必须在一个实体里面更新
+5. 如果在sendRpc里面 args.Term != 
+
+
+1. 将updateAppliedLock变为goroutine
+2. 设置超时时间更加随机
+3. 去掉了sendAppendEntries的reply参数
+4. 判断了reply.EffectionApply的参数 
+[error] : 报错commitIndex 不一致
+5. 将updateAppliedLock设置为goroutine。在logDuplicate函数
+[error]：未能达到共识
+6. 设置超时时间为 400 - 600，心跳间隔 300
+[error]：未能达到共识；too many rpc
+7. 取消第5步
+[error]：未能达到共识；index outputofrange
+8. 设置logduo59行判断条件为 >
+[error]: backup未能达到共识；单测试通过
+

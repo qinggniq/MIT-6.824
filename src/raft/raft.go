@@ -186,11 +186,13 @@ func (rf *Raft) updateTermLock(newTerm int) bool {
 	defer rf.mu.Unlock()
 	if rf.currentTerm < newTerm {
 		rf.currentTerm = newTerm
-		rf.role = Follower
+		if rf.role != Follower {
+			rf.role = Follower
+			go func() {
+				rf.msgChan <- BecomeFollower
+			}()
+		}
 		rf.votedFor = nil
-		go func() {
-			rf.msgChan <- BecomeFollower
-		}()
 		return true
 	}
 	return false
@@ -200,26 +202,20 @@ func (rf *Raft) updateTermLock(newTerm int) bool {
 
 func (rf *Raft) updateAppliedLock() bool {
 	rf.mu.Lock()
-
+	defer rf.mu.Unlock()
 	if rf.commitIndex > rf.lastApplied {
 
 		rf.lastApplied++
+		//DPrintf("[DEBUG] isLeader ? %v server: %d, logs : %v,  lastApplied %d,  command %v", rf.role == Leader, rf.me, rf.logs, rf.lastApplied, rf.logs[rf.lastApplied].Command)
 		applyMsg := ApplyMsg{
 			CommandValid: true,
 			Command:      rf.logs[rf.lastApplied].Command,
 			CommandIndex: rf.lastApplied,
 		}
-		rf.mu.Unlock()
-		go func(applyMsg ApplyMsg) {
-			rf.mu.Lock()
-			DPrintf("Leader[%d] apply %v", rf.me, applyMsg)
-			rf.mu.Unlock()
-			rf.applyChan <- applyMsg
-		}(applyMsg)
-		return true
+		rf.applyChan <- applyMsg
 
+		return true
 	}
-	rf.mu.Unlock()
 	return false
 }
 
@@ -281,12 +277,14 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 	defer rf.mu.Unlock()
 	isLeader = rf.role == Leader
 
-	if isLeader {
+	if rf.role == Leader {
 		index = len(rf.logs)
 		rf.logs = append(rf.logs, LogEntry{Term: rf.currentTerm, Command: command})
 		term = rf.currentTerm
-		DPrintf("Command {%v}, rf.logs %v", command, rf.logs)
-		go rf.logDuplicate(command)
+		//DPrintf("Command {%v}, rf.logs %v", command, rf.logs)
+		go func() {
+			rf.logDuplicate()
+		}()
 	} else {
 		term = rf.currentTerm
 	}
@@ -305,13 +303,10 @@ func (rf *Raft) Kill() {
 }
 
 func randomTimeOut(isLeader bool) time.Duration {
-	var div int
 	if isLeader {
-		div = 2
-	} else {
-		div = 1
+		return time.Duration(300) * time.Millisecond
 	}
-	return time.Duration((rand.Int()%500+1000)/div) * time.Millisecond
+	return time.Duration((rand.Int()%600 + 400)) * time.Millisecond
 }
 
 //
@@ -348,7 +343,7 @@ func Make(peers []*labrpc.ClientEnd, me int,
 	// }()
 	for i := 0; i < len(peers); i++ {
 		rf.nextIndex[i] = 1
-		rf.matchIndex[i] = 0
+		rf.matchIndex[i] = -1
 	}
 
 	// initialize from state persisted before a crash
@@ -359,39 +354,33 @@ func Make(peers []*labrpc.ClientEnd, me int,
 			rf.mu.Lock()
 			isLeader := rf.role == Leader
 			rf.mu.Unlock()
-
+			rf.updateAppliedLock()
 			select {
 			case <-time.After(randomTimeOut(isLeader)):
 				rf.mu.Lock()
-				isLeader = rf.role == Leader
+				role := rf.role
 				rf.mu.Unlock()
-
-				if isLeader {
-					go rf.updateAppliedLock()
-					go rf.logDuplicate(nil)
+				if role == Leader {
+					go rf.logDuplicate()
 				} else {
-					for {
-						res := rf.tryToBeLeader()
-						DPrintf("server [%d] to  be leader", rf.me)
-						if res == BecomeLeader {
-							rf.mu.Lock()
-							rf.role = Leader
-							for i := 0; i < len(rf.peers); i++ {
-								rf.nextIndex[i] = len(rf.logs)
-								rf.matchIndex[i] = 0
-							}
-							rf.mu.Unlock()
-
-							go rf.logDuplicate(nil)
-							break
-						} else if res == BecomeFollower {
-							break
-						}
-					}
+					DPrintf("[DEBUG] server [%d] try to  be leader", rf.me)
+					go rf.tryToBeLeader()
 				}
-			case <-rf.msgChan:
+			case msg := <-rf.msgChan:
+				if msg == BecomeLeader {
+					rf.mu.Lock()
+					rf.role = Leader
+					for i := 0; i < len(rf.peers); i++ {
+						rf.nextIndex[i] = len(rf.logs)
+						rf.matchIndex[i] = 0
+					}
+					go rf.logDuplicate()
+					rf.mu.Unlock()
+					DPrintf("[DEBUG]server [%d]   be a leader", rf.me)
+				}
 			}
 		}
+
 	}()
 
 	return rf
