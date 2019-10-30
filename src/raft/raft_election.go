@@ -56,7 +56,7 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	candidateLastLogTerm = args.LastLogTerm
 
 	rf.mu.Lock()
-	defer rf.mu.Unlock()
+
 	reply.Term = rf.currentTerm
 	currentTerm = rf.currentTerm
 	currentLastLogIndex = len(rf.logs) - 1 //TODO: fix the length corner case
@@ -68,29 +68,42 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 
 	//case 0 => I'm leader, so you must stop election
 	if isLeader {
+		rf.mu.Unlock()
 		return
 	}
 
 	//case 1 => the candidate is not suit to be voted
 	if currentTerm > candidateTerm {
+		rf.mu.Unlock()
 		return
 	}
 
 	//case 2 => the candidate's log is not lastest than the follwer
 	if currentLastLogTerm > candidateLastLogTerm || (currentLastLogTerm == candidateLastLogTerm && currentLastLogIndex > candidateLastLogIndex) {
+		rf.mu.Unlock()
 		return
 	}
 
 	//case3 => I have voted and is not you
 	if votedFor != nil && votedFor != candidateID {
+		rf.mu.Unlock()
 		return
 	}
+	rf.mu.Unlock()
 	//now I will vote you
+	var notFollower bool
+	rf.mu.Lock()
 	rf.votedFor = candidateID
-	go func() {
-		rf.msgChan <- RecivedVoteRequest
-	}()
+	if rf.role != Follower {
+		notFollower = true
+	}
+	rf.role = Follower
 	reply.VoteCranted = true
+	rf.mu.Unlock()
+	if notFollower {
+		rf.msgChan <- RecivedVoteRequest
+	}
+
 	return
 }
 
@@ -115,7 +128,7 @@ func (rf *Raft) tryToBeLeader() {
 	//Step 1
 	DPrintf("[DEBUG] : Sever %d, Status %d", rf.me, rf.role)
 	var maxVoteNum, currentSuccessNum int
-	var templateArgs RequestVoteArgs
+
 	rf.mu.Lock()
 	rf.currentTerm++
 	rf.votedFor = rf.me
@@ -128,6 +141,13 @@ func (rf *Raft) tryToBeLeader() {
 	for i := 0; i < maxVoteNum; i++ {
 		if i != rf.me {
 			go func(idx int) {
+				var templateArgs RequestVoteArgs
+				rf.mu.Lock()
+				aLeaderComeUp := rf.role == Follower || rf.role == Leader
+				rf.mu.Unlock()
+				if aLeaderComeUp {
+					return
+				}
 				rf.mu.Lock()
 				templateArgs.Term = rf.currentTerm
 				templateArgs.CandidateID = rf.me
@@ -138,19 +158,28 @@ func (rf *Raft) tryToBeLeader() {
 				args := templateArgs
 				var reply RequestVoteReply
 				ok := rf.sendRequestVote(idx, &args, &reply)
-				var aLeaderComeUp bool
+
 				rf.mu.Lock()
-				aLeaderComeUp = rf.role == Follower
+				aLeaderComeUp = rf.role == Follower || rf.role == Leader
 				rf.mu.Unlock()
 				if aLeaderComeUp {
-					rf.msgChan <- BecomeFollower
+					return
 				} else {
 					if ok {
 						mutex.Lock()
 						currentSuccessNum++
 						mutex.Unlock()
 						if currentSuccessNum >= maxVoteNum/2+1 {
+							rf.mu.Lock()
+							rf.role = Leader
+							for i := 0; i < len(rf.peers); i++ {
+								rf.nextIndex[i] = len(rf.logs)
+								rf.matchIndex[i] = 0
+							}
+							rf.mu.Unlock()
+							rf.logDuplicate()
 							rf.msgChan <- BecomeLeader
+							return
 						}
 					}
 				}

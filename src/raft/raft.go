@@ -183,18 +183,20 @@ func (rf *Raft) readPersist(data []byte) {
 func (rf *Raft) updateTermLock(newTerm int) bool {
 	//if I am outdated, I must be a follower
 	rf.mu.Lock()
-	defer rf.mu.Unlock()
+	//defer rf.mu.Unlock()
 	if rf.currentTerm < newTerm {
 		rf.currentTerm = newTerm
+		rf.votedFor = nil
 		if rf.role != Follower {
 			rf.role = Follower
-			go func() {
-				rf.msgChan <- BecomeFollower
-			}()
+			rf.mu.Unlock()
+			rf.msgChan <- BecomeFollower
+		} else {
+			rf.mu.Unlock()
 		}
-		rf.votedFor = nil
 		return true
 	}
+	rf.mu.Unlock()
 	return false
 }
 
@@ -304,9 +306,10 @@ func (rf *Raft) Kill() {
 
 func randomTimeOut(isLeader bool) time.Duration {
 	if isLeader {
-		return time.Duration(300) * time.Millisecond
+		return time.Duration(200+rand.Intn(200)) * time.Millisecond
 	}
-	return time.Duration((rand.Int()%600 + 400)) * time.Millisecond
+
+	return time.Duration(rand.Intn(400)+400) * time.Millisecond
 }
 
 //
@@ -363,21 +366,23 @@ func Make(peers []*labrpc.ClientEnd, me int,
 				if role == Leader {
 					go rf.logDuplicate()
 				} else {
-					DPrintf("[DEBUG] server [%d] try to  be leader", rf.me)
+					DPrintf("[DEBUG] server [%d]  to  be Candidate", rf.me)
 					go rf.tryToBeLeader()
 				}
 			case msg := <-rf.msgChan:
 				if msg == BecomeLeader {
-					rf.mu.Lock()
-					rf.role = Leader
-					for i := 0; i < len(rf.peers); i++ {
-						rf.nextIndex[i] = len(rf.logs)
-						rf.matchIndex[i] = 0
-					}
-					go rf.logDuplicate()
-					rf.mu.Unlock()
 					DPrintf("[DEBUG]server [%d]   be a leader", rf.me)
-				}
+				} else {
+					DPrintf("[DEBUG]server [%d]   be a follower", rf.me)
+				} // } else if msg == BecomeFollower {
+				// 	rf.mu.Lock()
+				// 	rf.role = Follower
+				// 	rf.mu.Unlock()
+				// } else {
+				// 	rf.mu.Lock()
+				// 	rf.role = Follower
+				// 	rf.mu.Unlock()
+				// }
 			}
 		}
 

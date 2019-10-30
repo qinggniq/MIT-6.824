@@ -18,4 +18,21 @@
 [error]：未能达到共识；index outputofrange
 8. 设置logduo59行判断条件为 >
 [error]: backup未能达到共识；单测试通过
+9. 将tryToBeLeader中出现新的leade的处理方式从 发消息 到 直接return 
+10. 在收到新leader的appendEntries的时候将自己改为follower状态
+11.将timeout超时时间设置为更大粒度
+[依然无法达到共识]
+12.将通知有leader发包设置为同步的
+阻塞了
+13.将锁放置到检查之后
+14. 将收到leader的包之后变成 Follower的操作放到AppendEntire的过程中。
+15. 讲收到有效投票请求后将自己的状态变为Follower
+16.选举成功后直接变为Leader，立刻发送心跳包
+17. 将收取投票后更新定时器变成阻塞
+18. 将updateTerm中的也变成同步的
+19. 把appendEntries中收到消息变成同步的
+20. 根据它是不是不是Follower决定同步还是异步重置定时器
+21. 在发起投票请求之前也判断是否出现了新的Leader
+22. 将Leader重置定时器也设置为同步的
+
 

@@ -1,6 +1,6 @@
 package raft
 
-func (rf *Raft) recviedAppendEntries(command interface{}) {
+func (rf *Raft) recviedAppendEntries() {
 
 	rf.msgChan <- RecivedMsg
 }
@@ -13,7 +13,7 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 	defer rf.updateAppliedLock()
 
 	rf.mu.Lock()
-	defer rf.mu.Unlock()
+
 	reply.Term = rf.currentTerm
 	//logsLen := len(rf.logs)
 
@@ -21,10 +21,20 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 
 	//DPrintf("[DEBUG] l %d t %d , f %d t %d", args.LeaderID, args.Term, rf.me, rf.currentTerm)
 	if args.Term < rf.currentTerm {
+		rf.mu.Unlock()
 		return
 	}
+	notFollower := rf.role != Follower
+	rf.role = Follower
+	rf.mu.Unlock()
+	if notFollower {
+		rf.recviedAppendEntries()
+	} else {
+		go rf.recviedAppendEntries()
+	}
 
-	go rf.recviedAppendEntries(args.Entries)
+	rf.mu.Lock()
+	defer rf.mu.Unlock()
 	//case2 => pre log does not match
 	if len(rf.logs) <= args.PrevLogIndex || rf.logs[args.PrevLogIndex].Term != args.PrevLogTerm {
 		DPrintf("case2")
@@ -123,10 +133,6 @@ func (rf *Raft) logDuplicate() int {
 
 	rf.updateAppliedLock()
 
-	//rf.mu.Lock()
-	//DPrintf("\nLeader[%d] Term[%d] Commited[%d] Apply[%d] logs : :  %v  nextIndex: %v matchIndex : %v\n\n", rf.me, rf.currentTerm, rf.commitIndex, rf.lastApplied, rf.logs, rf.nextIndex, rf.matchIndex)
-	//rf.mu.Unlock()
-
 	for i := 0; i < len(rf.peers); i++ {
 		if i != rf.me {
 			go func(idx int) {
@@ -153,12 +159,10 @@ func (rf *Raft) logDuplicate() int {
 					}
 					rf.mu.Unlock()
 					ok = !rf.sendAppendEntries(idx, &args)
-
-					//time.Sleep(time.Millisecond * 100)
 				}
 				upper := len(rf.peers) / 2
 				rf.mu.Lock()
-				for i := rf.commitIndex + 1; i < len(rf.logs); i++ {
+				for i := len(rf.logs) - 1; i > rf.commitIndex; i-- {
 					cnt := 0
 					for j := 0; j < len(rf.peers); j++ {
 						if j != rf.me && i <= rf.matchIndex[j] {
@@ -168,6 +172,7 @@ func (rf *Raft) logDuplicate() int {
 					if cnt >= upper {
 						if rf.logs[i].Term == rf.currentTerm {
 							rf.commitIndex = i
+							break
 						}
 					}
 				}
