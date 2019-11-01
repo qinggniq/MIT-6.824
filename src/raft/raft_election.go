@@ -42,12 +42,10 @@ type RequestVoteReply struct {
 // reciver : follower
 //
 func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
-	defer rf.persist()
+
 	//defer rf.updateAppliedLock()
 	//Your code here (2A, 2B).
-	rf.mu.Lock()
 	isALeader := rf.role == Leader
-	rf.mu.Unlock()
 
 	if rf.updateTermLock(args.Term) && isALeader {
 		//DPrintf("[DEBUG] Server %d from %d to Follower  {requestVote : Term higher}", rf.me, Leader)
@@ -70,29 +68,25 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	currentLastLogTerm = rf.logs[len(rf.logs)-1].Term
 	votedFor = rf.votedFor
 	isFollower := rf.role == Follower
-
+	rf.mu.Unlock()
 	//case 0 => I'm leader, so you must stop election
 	if !isFollower {
 		DPrintf("[DEBUG] Case0 I [%d] is Candidate than %d", rf.me, args.CandidateID)
-		rf.mu.Unlock()
 		return
 	}
 
 	//case 1 => the candidate is not suit to be voted
 	if currentTerm > candidateTerm {
 		DPrintf("[DEBUG] Case1 Follower %d > Candidate %d ", rf.me, args.CandidateID)
-		rf.mu.Unlock()
-
 		return
 	}
 
 	//case 2 => the candidate's log is not lastest than the follwer
 	if currentLastLogTerm > candidateLastLogTerm || (currentLastLogTerm == candidateLastLogTerm && currentLastLogIndex > candidateLastLogIndex) {
 		DPrintf("[DEBUG] Case2 don't my[%d] newer than can[%d]", rf.me, args.CandidateID)
-		rf.mu.Unlock()
 		return
 	}
-
+	rf.mu.Lock()
 	//case3 => I have voted and is not you
 	if votedFor != nil && votedFor != candidateID {
 		rf.mu.Unlock()
@@ -100,24 +94,22 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	}
 
 	//now I will vote you
+
 	var notFollower bool
 	rf.votedFor = candidateID
 	if rf.role != Follower {
 		notFollower = true
 	}
 	DPrintf("[Vote] Server[%d] vote to Can[%d]", rf.me, args.CandidateID)
-	//DPrintf("[DEBUG] Server %d from %d to Follower  {requestVote : toVote %d}", rf.me, rf.role, args.CandidateID)
 	rf.role = Follower
 	reply.VoteCranted = true
-	//rf.persist()
+	rf.mu.Unlock()
+	rf.persist()
 	if notFollower {
 		rf.msgChan <- RecivedVoteRequest
 	} else {
 		rf.msgChan <- RecivedVoteRequest
 	}
-	rf.mu.Unlock()
-
-	rf.persist()
 
 	return
 }
@@ -146,14 +138,13 @@ func (rf *Raft) sendRequestVote(server int, args *RequestVoteArgs, reply *Reques
 func (rf *Raft) tryToBeLeader() {
 	//Step 1
 	var maxVoteNum, currentSuccessNum int
-
 	rf.mu.Lock()
 	rf.currentTerm++
 	rf.votedFor = rf.me
 	rf.role = Candidate
 	maxVoteNum = len(rf.peers)
-	//rf.persist()
 	rf.mu.Unlock()
+	rf.persist()
 
 	currentSuccessNum = 1
 	var mutex sync.Mutex
@@ -163,11 +154,11 @@ func (rf *Raft) tryToBeLeader() {
 				var templateArgs RequestVoteArgs
 				rf.mu.Lock()
 				aLeaderComeUp := rf.role == Follower || rf.role == Leader
-				rf.mu.Unlock()
+
 				if aLeaderComeUp {
+					rf.mu.Unlock()
 					return
 				}
-				rf.mu.Lock()
 				templateArgs.Term = rf.currentTerm
 				templateArgs.CandidateID = rf.me
 				templateArgs.LastLogTerm = rf.logs[len(rf.logs)-1].Term
@@ -195,10 +186,9 @@ func (rf *Raft) tryToBeLeader() {
 								rf.nextIndex[i] = len(rf.logs)
 								rf.matchIndex[i] = 0
 							}
-							//rf.persist()
 							rf.mu.Unlock()
 							go rf.logDuplicate()
-							go func() { rf.msgChan <- BecomeLeader }()
+							rf.msgChan <- BecomeLeader
 							return
 						}
 					}

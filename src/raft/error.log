@@ -38,4 +38,5 @@
 24: 判断currentTerm和当前Term提前
 25: 实际上是测试结束goroutine没有关闭
 26: 当前log相同的时候把Enties的内容也要复制一遍，因加了优化之后可能当前的一样后面的可能又不一样了。
+27: 删掉AppendEntire里面的锁
 

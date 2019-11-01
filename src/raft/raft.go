@@ -156,19 +156,15 @@ func (rf *Raft) persist() {
 	// Example:
 	w := new(bytes.Buffer)
 	e := labgob.NewEncoder(w)
-	//rf.mu.Lock()
-	//rf.mu.Lock()
-
+	rf.mu.Lock()
 	e.Encode(rf.currentTerm)
 	if rf.votedFor == nil {
 		e.Encode(-1)
 	} else {
 		e.Encode(rf.votedFor)
 	}
-	e.Encode(rf.logs) //logs
-	//rf.mu.Unlock()
-	//e.Encode(rf.commitIndex)
-	//rf.mu.Unlock()
+	e.Encode(rf.logs)
+	rf.mu.Unlock()
 	data := w.Bytes()
 	rf.persister.SaveRaftState(data)
 }
@@ -229,23 +225,22 @@ func (rf *Raft) updateTermLock(newTerm int) bool {
 
 func (rf *Raft) updateAppliedLock() bool {
 	rf.mu.Lock()
-	if rf.commitIndex > rf.lastApplied {
-
+	defer rf.mu.Unlock()
+	flag := false
+	for i := 0; rf.commitIndex > rf.lastApplied && i <= 100; {
 		rf.lastApplied++
-		//DPrintf("[DEBUG] isLeader ? %v server: %d, logs : %v,  lastApplied %d,  command %v", rf.role == Leader, rf.me, rf.logs, rf.lastApplied, rf.logs[rf.lastApplied].Command)
+		i++
+		//DPrintf("[Apply] Server %d isLeader? %v lastApplied %v len(logs) %d committed %d", rf.me, rf.role == Leader, rf.lastApplied, len(rf.logs), rf.commitIndex)
 		applyMsg := ApplyMsg{
 			CommandValid: true,
 			Command:      rf.logs[rf.lastApplied].Command,
 			CommandIndex: rf.lastApplied,
 		}
 		rf.applyChan <- applyMsg
-		//DPrintf("[ApplyMsg] Server[%d] Commite %d %d", rf.me, rf.commitIndex, rf.logs[rf.lastApplied].Command)
-		rf.mu.Unlock()
-
-		return true
+		//rf.mu.Lock()
+		flag = true
 	}
-	rf.mu.Unlock()
-	return false
+	return flag
 }
 
 //
@@ -384,7 +379,7 @@ func Make(peers []*labrpc.ClientEnd, me int,
 			isLeader := rf.role == Leader
 			timer := time.After(randomTimeOut(isLeader))
 			rf.mu.Unlock()
-			go rf.updateAppliedLock()
+			rf.updateAppliedLock()
 			select {
 			case msg := <-rf.msgChan:
 				if msg == End {
@@ -403,23 +398,27 @@ func Make(peers []*labrpc.ClientEnd, me int,
 				default:
 				}
 
-				rf.mu.Lock()
 				if msg == BecomeLeader {
-					DPrintf("[DEBUG]server [%d] T[%d]  be a leader", rf.me, rf.currentTerm)
+
 				} else {
-					DPrintf("[DEBUG]server [%d] T[%d]  be a follower", rf.me, rf.currentTerm)
+					if len(rf.logs) > 5 {
+						DPrintf("[DEBUG]server [%d] T[%d] a follower commitIndex %d apply %d logs %v", rf.me, rf.currentTerm, rf.commitIndex, rf.lastApplied, rf.logs[len(rf.logs)-5:])
+					}
+
 				}
-				rf.mu.Unlock()
 			case <-timer:
 				rf.mu.Lock()
 				role := rf.role
 				rf.mu.Unlock()
 				if role == Leader {
+					if len(rf.logs) > 5 {
+						DPrintf("[DEBUG]server [%d] T[%d] a leader commitIndex %d  apply %d logs %v", rf.me, rf.currentTerm, rf.commitIndex, rf.lastApplied, rf.logs[len(rf.logs)-5:])
+					}
 					go rf.logDuplicate()
 				} else if role == None {
 					return
 				} else {
-					DPrintf("[DEBUG] server [%d] T[%d] be Candidate", rf.me, rf.currentTerm)
+					DPrintf("[DEBUG] server [%d] T[%d] be Candidate logs[:5]", rf.me, rf.currentTerm)
 					go rf.tryToBeLeader()
 				}
 
