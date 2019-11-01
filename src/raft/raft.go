@@ -18,6 +18,8 @@ package raft
 //
 
 import (
+	"bytes"
+	"lab/labgob"
 	labrpc "lab/labrpc"
 	"math/rand"
 	"sync"
@@ -35,6 +37,7 @@ const (
 	Leader    = 0 //leader = 0
 	Candidate = 1 //cnadidate = 1
 	Follower  = 2 //follower = 2
+	None      = 3
 )
 
 //
@@ -81,9 +84,11 @@ type AppendEntriesArgs AppendEntries
 //AppendEntriesReply reply
 //
 type AppendEntriesReply struct {
-	Term            int
-	Success         bool
-	EffectiveAppend int
+	Term              int
+	Success           bool
+	EffectiveAppend   int
+	LastConflictTerm  int
+	LastConflictIndex int
 }
 
 //
@@ -149,12 +154,23 @@ func (rf *Raft) GetState() (int, bool) {
 func (rf *Raft) persist() {
 	// Your code here (2C).
 	// Example:
-	// w := new(bytes.Buffer)
-	// e := labgob.NewEncoder(w)
-	// e.Encode(rf.xxx)
-	// e.Encode(rf.yyy)
-	// data := w.Bytes()
-	// rf.persister.SaveRaftState(data)
+	w := new(bytes.Buffer)
+	e := labgob.NewEncoder(w)
+	//rf.mu.Lock()
+	//rf.mu.Lock()
+
+	e.Encode(rf.currentTerm)
+	if rf.votedFor == nil {
+		e.Encode(-1)
+	} else {
+		e.Encode(rf.votedFor)
+	}
+	e.Encode(rf.logs) //logs
+	//rf.mu.Unlock()
+	//e.Encode(rf.commitIndex)
+	//rf.mu.Unlock()
+	data := w.Bytes()
+	rf.persister.SaveRaftState(data)
 }
 
 //
@@ -166,17 +182,25 @@ func (rf *Raft) readPersist(data []byte) {
 	}
 	// Your code here (2C).
 	// Example:
-	// r := bytes.NewBuffer(data)
-	// d := labgob.NewDecoder(r)
-	// var xxx
-	// var yyy
-	// if d.Decode(&xxx) != nil ||
-	//    d.Decode(&yyy) != nil {
-	//   error...
-	// } else {
-	//   rf.xxx = xxx
-	//   rf.yyy = yyy
-	// }
+	r := bytes.NewBuffer(data)
+	d := labgob.NewDecoder(r)
+	var currentTerm int
+	var votedFor int
+	var logs []LogEntry
+	if d.Decode(&currentTerm) != nil ||
+		d.Decode(&votedFor) != nil || d.Decode(&logs) != nil {
+		DPrintf("[Persister] error")
+	} else {
+		rf.mu.Lock()
+		rf.currentTerm = currentTerm
+		if votedFor == -1 {
+			rf.votedFor = nil
+		} else {
+			rf.votedFor = votedFor
+		}
+		rf.logs = logs
+		rf.mu.Unlock()
+	}
 }
 
 //update the term
@@ -190,6 +214,7 @@ func (rf *Raft) updateTermLock(newTerm int) bool {
 		if rf.role != Follower {
 			rf.role = Follower
 			rf.mu.Unlock()
+			rf.persist()
 			rf.msgChan <- BecomeFollower
 		} else {
 			rf.mu.Unlock()
@@ -204,7 +229,6 @@ func (rf *Raft) updateTermLock(newTerm int) bool {
 
 func (rf *Raft) updateAppliedLock() bool {
 	rf.mu.Lock()
-	defer rf.mu.Unlock()
 	if rf.commitIndex > rf.lastApplied {
 
 		rf.lastApplied++
@@ -215,9 +239,12 @@ func (rf *Raft) updateAppliedLock() bool {
 			CommandIndex: rf.lastApplied,
 		}
 		rf.applyChan <- applyMsg
+		//DPrintf("[ApplyMsg] Server[%d] Commite %d %d", rf.me, rf.commitIndex, rf.logs[rf.lastApplied].Command)
+		rf.mu.Unlock()
 
 		return true
 	}
+	rf.mu.Unlock()
 	return false
 }
 
@@ -276,22 +303,19 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 
 	// Your code here (2B).
 	rf.mu.Lock()
-	defer rf.mu.Unlock()
+	//defer rf.mu.Unlock()
 	isLeader = rf.role == Leader
-
 	if rf.role == Leader {
 		index = len(rf.logs)
 		rf.logs = append(rf.logs, LogEntry{Term: rf.currentTerm, Command: command})
 		term = rf.currentTerm
-		//DPrintf("Command {%v}, rf.logs %v", command, rf.logs)
-		go func() {
-			rf.logDuplicate()
-		}()
+		rf.mu.Unlock()
+		rf.persist()
 	} else {
 		term = rf.currentTerm
+		rf.mu.Unlock()
 	}
 	return index, term, isLeader
-
 }
 
 //
@@ -302,14 +326,18 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 //
 func (rf *Raft) Kill() {
 	// Your code here, if desired.
+	rf.mu.Lock()
+	rf.role = None
+	rf.mu.Unlock()
+	rf.msgChan <- End
+
 }
 
 func randomTimeOut(isLeader bool) time.Duration {
 	if isLeader {
-		return time.Duration(200+rand.Intn(200)) * time.Millisecond
+		return time.Duration(100) * time.Millisecond
 	}
-
-	return time.Duration(rand.Intn(400)+400) * time.Millisecond
+	return time.Duration(rand.Intn(150)+200) * time.Millisecond
 }
 
 //
@@ -326,6 +354,7 @@ func randomTimeOut(isLeader bool) time.Duration {
 func Make(peers []*labrpc.ClientEnd, me int,
 	persister *Persister, applyCh chan ApplyMsg) *Raft {
 	rf := &Raft{}
+	rf.mu.Lock()
 	rf.peers = peers
 	rf.persister = persister
 	rf.me = me
@@ -341,14 +370,11 @@ func Make(peers []*labrpc.ClientEnd, me int,
 	rf.msgChan = make(chan int, 1)
 	rf.applyChan = applyCh
 
-	// go func() {
-	// 	rf.applyChan <- ApplyMsg{CommandValid: true, Command: 1, CommandIndex: 0}
-	// }()
 	for i := 0; i < len(peers); i++ {
 		rf.nextIndex[i] = 1
 		rf.matchIndex[i] = -1
 	}
-
+	rf.mu.Unlock()
 	// initialize from state persisted before a crash
 	rf.readPersist(persister.ReadRaftState())
 
@@ -356,33 +382,47 @@ func Make(peers []*labrpc.ClientEnd, me int,
 		for {
 			rf.mu.Lock()
 			isLeader := rf.role == Leader
+			timer := time.After(randomTimeOut(isLeader))
 			rf.mu.Unlock()
-			rf.updateAppliedLock()
+			go rf.updateAppliedLock()
 			select {
-			case <-time.After(randomTimeOut(isLeader)):
+			case msg := <-rf.msgChan:
+				if msg == End {
+					return
+				}
+				// rf.mu.Lock()
+				// if rf.role == Leader {
+				// 	DPrintf("[DEBUG]: Leader [%d] Term[%d]")
+				// } else {
+				// 	DPrintf("[DEBUG]: Follower[%d]")
+				// }
+
+				// rf.mu.Unlock()
+				select {
+				case <-rf.msgChan:
+				default:
+				}
+
+				rf.mu.Lock()
+				if msg == BecomeLeader {
+					DPrintf("[DEBUG]server [%d] T[%d]  be a leader", rf.me, rf.currentTerm)
+				} else {
+					DPrintf("[DEBUG]server [%d] T[%d]  be a follower", rf.me, rf.currentTerm)
+				}
+				rf.mu.Unlock()
+			case <-timer:
 				rf.mu.Lock()
 				role := rf.role
 				rf.mu.Unlock()
 				if role == Leader {
 					go rf.logDuplicate()
+				} else if role == None {
+					return
 				} else {
-					DPrintf("[DEBUG] server [%d]  to  be Candidate", rf.me)
+					DPrintf("[DEBUG] server [%d] T[%d] be Candidate", rf.me, rf.currentTerm)
 					go rf.tryToBeLeader()
 				}
-			case msg := <-rf.msgChan:
-				if msg == BecomeLeader {
-					DPrintf("[DEBUG]server [%d]   be a leader", rf.me)
-				} else {
-					DPrintf("[DEBUG]server [%d]   be a follower", rf.me)
-				} // } else if msg == BecomeFollower {
-				// 	rf.mu.Lock()
-				// 	rf.role = Follower
-				// 	rf.mu.Unlock()
-				// } else {
-				// 	rf.mu.Lock()
-				// 	rf.role = Follower
-				// 	rf.mu.Unlock()
-				// }
+
 			}
 		}
 

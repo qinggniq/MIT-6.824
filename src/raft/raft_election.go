@@ -11,6 +11,7 @@ const (
 	TimeOut            = 2
 	RecivedMsg         = 3
 	RecivedVoteRequest = 4
+	End                = 5
 )
 
 //
@@ -41,13 +42,19 @@ type RequestVoteReply struct {
 // reciver : follower
 //
 func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
-
+	defer rf.persist()
 	//defer rf.updateAppliedLock()
 	//Your code here (2A, 2B).
-	rf.updateTermLock(args.Term)
+	rf.mu.Lock()
+	isALeader := rf.role == Leader
+	rf.mu.Unlock()
+
+	if rf.updateTermLock(args.Term) && isALeader {
+		//DPrintf("[DEBUG] Server %d from %d to Follower  {requestVote : Term higher}", rf.me, Leader)
+	}
 	reply.VoteCranted = false
 	var votedFor interface{}
-	var isLeader bool
+	//var isLeader bool
 	var candidateID, currentTerm, candidateTerm, currentLastLogIndex, candidateLastLogIndex, currentLastLogTerm, candidateLastLogTerm int
 
 	candidateID = args.CandidateID
@@ -62,24 +69,26 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	currentLastLogIndex = len(rf.logs) - 1 //TODO: fix the length corner case
 	currentLastLogTerm = rf.logs[len(rf.logs)-1].Term
 	votedFor = rf.votedFor
-	isLeader = rf.role == Leader
-
-	//DPrintf("[DEBUG] c %d  %d-- f %d %d %v", candidateID, candidateLastLogTerm, rf.me, currentLastLogTerm, rf.logs)
+	isFollower := rf.role == Follower
 
 	//case 0 => I'm leader, so you must stop election
-	if isLeader {
+	if !isFollower {
+		DPrintf("[DEBUG] Case0 I [%d] is Candidate than %d", rf.me, args.CandidateID)
 		rf.mu.Unlock()
 		return
 	}
 
 	//case 1 => the candidate is not suit to be voted
 	if currentTerm > candidateTerm {
+		DPrintf("[DEBUG] Case1 Follower %d > Candidate %d ", rf.me, args.CandidateID)
 		rf.mu.Unlock()
+
 		return
 	}
 
 	//case 2 => the candidate's log is not lastest than the follwer
 	if currentLastLogTerm > candidateLastLogTerm || (currentLastLogTerm == candidateLastLogTerm && currentLastLogIndex > candidateLastLogIndex) {
+		DPrintf("[DEBUG] Case2 don't my[%d] newer than can[%d]", rf.me, args.CandidateID)
 		rf.mu.Unlock()
 		return
 	}
@@ -89,44 +98,53 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 		rf.mu.Unlock()
 		return
 	}
-	rf.mu.Unlock()
+
 	//now I will vote you
 	var notFollower bool
-	rf.mu.Lock()
 	rf.votedFor = candidateID
 	if rf.role != Follower {
 		notFollower = true
 	}
+	DPrintf("[Vote] Server[%d] vote to Can[%d]", rf.me, args.CandidateID)
+	//DPrintf("[DEBUG] Server %d from %d to Follower  {requestVote : toVote %d}", rf.me, rf.role, args.CandidateID)
 	rf.role = Follower
 	reply.VoteCranted = true
-	rf.mu.Unlock()
+	//rf.persist()
 	if notFollower {
 		rf.msgChan <- RecivedVoteRequest
+	} else {
+		rf.msgChan <- RecivedVoteRequest
 	}
+	rf.mu.Unlock()
+
+	rf.persist()
 
 	return
 }
 
 func (rf *Raft) sendRequestVote(server int, args *RequestVoteArgs, reply *RequestVoteReply) bool {
 	ok := rf.peers[server].Call("Raft.RequestVote", args, reply)
-	if rf.updateTermLock(reply.Term) {
-		return false
-	}
+
 	rf.mu.Lock()
 	if rf.currentTerm != args.Term {
 		rf.mu.Unlock()
+		rf.persist()
 		return false
 	}
 	rf.mu.Unlock()
-	ok = ok && reply.VoteCranted
 
-	return ok
+	if rf.updateTermLock(reply.Term) {
+		DPrintf("[DEBUG] Candidate %d from %d to follower", rf.me, Candidate)
+		rf.persist()
+		return false
+	}
+
+	return ok && reply.VoteCranted
 }
 
 //a follower try to elect the other servers' vote to be a leader
 func (rf *Raft) tryToBeLeader() {
 	//Step 1
-	DPrintf("[DEBUG] : Sever %d, Status %d", rf.me, rf.role)
 	var maxVoteNum, currentSuccessNum int
 
 	rf.mu.Lock()
@@ -134,6 +152,7 @@ func (rf *Raft) tryToBeLeader() {
 	rf.votedFor = rf.me
 	rf.role = Candidate
 	maxVoteNum = len(rf.peers)
+	//rf.persist()
 	rf.mu.Unlock()
 
 	currentSuccessNum = 1
@@ -160,7 +179,7 @@ func (rf *Raft) tryToBeLeader() {
 				ok := rf.sendRequestVote(idx, &args, &reply)
 
 				rf.mu.Lock()
-				aLeaderComeUp = rf.role == Follower || rf.role == Leader
+				aLeaderComeUp = rf.role == Follower || rf.role == Leader || rf.role == None
 				rf.mu.Unlock()
 				if aLeaderComeUp {
 					return
@@ -176,9 +195,10 @@ func (rf *Raft) tryToBeLeader() {
 								rf.nextIndex[i] = len(rf.logs)
 								rf.matchIndex[i] = 0
 							}
+							//rf.persist()
 							rf.mu.Unlock()
-							rf.logDuplicate()
-							rf.msgChan <- BecomeLeader
+							go rf.logDuplicate()
+							go func() { rf.msgChan <- BecomeLeader }()
 							return
 						}
 					}
